@@ -36,4 +36,12 @@ public class UsuarioController {
         }
         return ResponseEntity.ok(usuarioService.actualizar(id, usuario));
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable int id){
+        if (!usuarioService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        usuarioService.eliminar(id);
+        return ResponseEntity.ok().build();
+    }
 }
