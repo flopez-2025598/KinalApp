@@ -23,5 +23,10 @@ public class UsuarioController {
     public Usuario guardar(@RequestBody Usuario usuario){
         return usuarioService.guardar(usuario);
     }
-
+    @GetMapping("/{id}")
+    public ResponseEntity<Usuario> buscarPorId(@PathVariable int id){
+        return usuarioService.buscarPorId(id)
+                .map(usuario -> ResponseEntity.ok(usuario))
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
