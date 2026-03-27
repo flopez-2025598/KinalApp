@@ -16,7 +16,6 @@ public class ClienteController {
         this.repo = repo;
     }
 
-
     @GetMapping
     public List<Cliente> listar(){
         return repo.findAll();
@@ -28,7 +27,7 @@ public class ClienteController {
     }
 
     @PutMapping("/{dpi}")
-    public ResponseEntity<Cliente> actualizar(@PathVariable  String dpi , @RequestBody Cliente cliente{
+    public ResponseEntity<Cliente> actualizar(@PathVariable String dpi, @RequestBody Cliente cliente){
         if (!repo.existsById(dpi)){
             return ResponseEntity.notFound().build();
         }
@@ -39,9 +38,7 @@ public class ClienteController {
     @GetMapping("/{dpi}")
     public ResponseEntity<Cliente> buscarPorDpi(@PathVariable String dpi){
         return repo.findById(dpi)
-                .map(cliente-> ResponseEntity.ok(cliente))
+                .map(cliente -> ResponseEntity.ok(cliente))
                 .orElse(ResponseEntity.notFound().build());
     }
-
-
 }
