@@ -40,7 +40,7 @@ public class ClienteController {
     public ResponseEntity<Cliente> buscarPorDpi(@PathVariable String dpi){
         return repo.findById(dpi)
                 .map(cliente-> ResponseEntity.ok(cliente))
-                .orgElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
 
