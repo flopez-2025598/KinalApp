@@ -1,4 +1,3 @@
-// ProductoService.java
 package com.fareslopez.kinalapp.service;
 
 import com.fareslopez.kinalapp.entity.Producto;
@@ -7,26 +6,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class ProductoService {
+public class ProductoService implements IProductoService {
 
     @Autowired
     private ProductoRepository productoRepository;
 
-    public List<Producto> getAll(){
+    @Override
+    public List<Producto> listarTodos(){
         return productoRepository.findAll();
     }
 
-    public Producto getById(int id){
-        return productoRepository.findById(id).orElse(null);
-    }
-
-    public Producto save(Producto producto){
+    @Override
+    public Producto guardar(Producto producto){
         return productoRepository.save(producto);
     }
 
-    public void delete(int id){
+    @Override
+    public Optional<Producto> buscarPorId(int id){
+        return productoRepository.findById(id);
+    }
+
+    @Override
+    public Producto actualizar(int id, Producto producto){
+        producto.setCodigoProducto(id);
+        return productoRepository.save(producto);
+    }
+
+    @Override
+    public void eliminar(int id){
         productoRepository.deleteById(id);
+    }
+
+    @Override
+    public boolean existePorId(int id){
+        return productoRepository.existsById(id);
     }
 }
