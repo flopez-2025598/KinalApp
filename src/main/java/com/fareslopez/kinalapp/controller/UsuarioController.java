@@ -29,4 +29,11 @@ public class UsuarioController {
                 .map(usuario -> ResponseEntity.ok(usuario))
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizar(@PathVariable int id, @RequestBody Usuario usuario){
+        if (!usuarioService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(usuarioService.actualizar(id, usuario));
+    }
 }
