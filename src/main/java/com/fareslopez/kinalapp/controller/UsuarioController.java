@@ -18,4 +18,10 @@ public class UsuarioController {
     public List<Usuario> listar() {
         return usuarioService.listarTodos();
     }
+
+    @PostMapping
+    public Usuario guardar(@RequestBody Usuario usuario){
+        return usuarioService.guardar(usuario);
+    }
+
 }
