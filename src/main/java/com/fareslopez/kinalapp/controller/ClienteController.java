@@ -16,7 +16,6 @@ public class ClienteController {
         this.repo = repo;
     }
 
-
     @GetMapping
     public List<Cliente> listar(){
         return repo.findAll();
@@ -28,20 +27,27 @@ public class ClienteController {
     }
 
     @PutMapping("/{dpi}")
-    public ResponseEntity<Cliente> actualizar(@PathVariable  String dpi , @RequestBody Cliente cliente{
+    public ResponseEntity<Cliente> actualizar(@PathVariable int dpi, @RequestBody Cliente cliente){
         if (!repo.existsById(dpi)){
             return ResponseEntity.notFound().build();
         }
-        cliente.setDPICliente(dpi);
+        cliente.setDpiCliente(dpi);
         return ResponseEntity.ok(repo.save(cliente));
     }
 
     @GetMapping("/{dpi}")
-    public ResponseEntity<Cliente> buscarPorDpi(@PathVariable String dpi){
+    public ResponseEntity<Cliente> buscarPorDpi(@PathVariable int dpi){
         return repo.findById(dpi)
-                .map(cliente-> ResponseEntity.ok(cliente))
-                .orgElse(ResponseEntity.notFound().build());
+                .map(cliente -> ResponseEntity.ok(cliente))
+                .orElse(ResponseEntity.notFound().build());
     }
 
-
+    @DeleteMapping("/{dpi}")
+    public ResponseEntity<Void> eliminar(@PathVariable int dpi){
+        if (!repo.existsById(dpi)){
+            return ResponseEntity.notFound().build();
+        }
+        repo.deleteById(dpi);
+        return ResponseEntity.ok().build();
+    }
 }
