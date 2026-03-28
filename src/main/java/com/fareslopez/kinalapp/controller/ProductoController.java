@@ -28,5 +28,11 @@ public class ProductoController {
                 .map(producto -> ResponseEntity.ok(producto))
                 .orElse(ResponseEntity.notFound().build());
     }
-
+    @PutMapping("/{id}")
+    public ResponseEntity<Producto> actualizar(@PathVariable int id, @RequestBody Producto producto){
+        if (!productoService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productoService.actualizar(id, producto));
+    }
 }
