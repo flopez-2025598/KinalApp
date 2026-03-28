@@ -18,4 +18,8 @@ public class ProductoController {
     public List<Producto> listar() {
         return productoService.listarTodos();
     }
+    @PostMapping
+    public Producto guardar(@RequestBody Producto producto){
+        return productoService.guardar(producto);
+    }
 }
