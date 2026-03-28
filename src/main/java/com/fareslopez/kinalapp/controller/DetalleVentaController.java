@@ -18,4 +18,8 @@ public class DetalleVentaController {
     public List<DetalleVenta> listar() {
         return detalleVentaService.listarTodos();
     }
+    @PostMapping
+    public DetalleVenta guardar(@RequestBody DetalleVenta detalleVenta){
+        return detalleVentaService.guardar(detalleVenta);
+    }
 }
