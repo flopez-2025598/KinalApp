@@ -18,4 +18,8 @@ public class VentaController {
     public List<Venta> listar() {
         return ventaService.listarTodos();
     }
+    @PostMapping
+    public Venta guardar(@RequestBody Venta venta){
+        return ventaService.guardar(venta);
+    }
 }
