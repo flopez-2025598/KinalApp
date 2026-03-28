@@ -28,4 +28,12 @@ public class VentaController {
                 .map(venta -> ResponseEntity.ok(venta))
                 .orElse(ResponseEntity.notFound().build());
     }
+    @PutMapping("/{id}")
+    public ResponseEntity<Venta> actualizar(@PathVariable int id, @RequestBody Venta venta){
+        if (!ventaService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(ventaService.actualizar(id, venta));
+    }
+
 }
