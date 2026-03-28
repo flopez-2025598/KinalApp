@@ -10,67 +10,43 @@ import java.math.BigDecimal;
 @Entity
 @Table(name = "Productos")
 public class Producto {
+
     @Id
-    @Column(name = "codigo_Producto")
+    @Column(name = "codigo_producto")
     private int codigoProducto;
     @Column
-    private String Nombreproducto;
+    private String nombreProducto;
     @Column(precision = 10, scale = 2)
     private BigDecimal precio;
     @Column
-    private int Stock;
+    private int stock;
     @Column
-    private int Estado;
+    private int estado;
 
     public Producto(){
 
     }
-    public Producto(int CodigoProducto, String Nombreproducto, BigDecimal precio, int Stock, int Estado ){
-        this.codigoProducto = CodigoProducto;
-        this.Nombreproducto = Nombreproducto;
+
+    public Producto(int codigoProducto, String nombreProducto, BigDecimal precio, int stock, int estado){
+        this.codigoProducto = codigoProducto;
+        this.nombreProducto = nombreProducto;
         this.precio = precio;
-        this.Stock = Stock;
-        this.Estado = Estado;
-
+        this.stock = stock;
+        this.estado = estado;
     }
 
-    public int getCodigoProducto() {
-        return codigoProducto;
-    }
+    public int getCodigoProducto() { return codigoProducto; }
+    public void setCodigoProducto(int codigoProducto) { this.codigoProducto = codigoProducto; }
 
-    public void setCodigoProducto(int codigoProducto) {
-        codigoProducto = codigoProducto;
-    }
+    public String getNombreProducto() { return nombreProducto; }
+    public void setNombreProducto(String nombreProducto) { this.nombreProducto = nombreProducto; }
 
-    public String getNombreproducto() {
-        return Nombreproducto;
-    }
+    public BigDecimal getPrecio() { return precio; }
+    public void setPrecio(BigDecimal precio) { this.precio = precio; }
 
-    public void setNombreproducto(String nombreproducto) {
-        Nombreproducto = nombreproducto;
-    }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public BigDecimal getPrecio() {
-        return precio;
-    }
-
-    public void setPrecio(BigDecimal precio) {
-        this.precio = precio;
-    }
-
-    public int getStock() {
-        return Stock;
-    }
-
-    public void setStock(int stock) {
-        Stock = stock;
-    }
-
-    public int getEstado() {
-        return Estado;
-    }
-
-    public void setEstado(int estado) {
-        Estado = estado;
-    }
+    public int getEstado() { return estado; }
+    public void setEstado(int estado) { this.estado = estado; }
 }
