@@ -22,4 +22,10 @@ public class DetalleVentaController {
     public DetalleVenta guardar(@RequestBody DetalleVenta detalleVenta){
         return detalleVentaService.guardar(detalleVenta);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<DetalleVenta> buscarPorId(@PathVariable int id){
+        return detalleVentaService.buscarPorId(id)
+                .map(detalleVenta -> ResponseEntity.ok(detalleVenta))
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
