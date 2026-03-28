@@ -22,4 +22,11 @@ public class ProductoController {
     public Producto guardar(@RequestBody Producto producto){
         return productoService.guardar(producto);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Producto> buscarPorId(@PathVariable int id){
+        return productoService.buscarPorId(id)
+                .map(producto -> ResponseEntity.ok(producto))
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }
