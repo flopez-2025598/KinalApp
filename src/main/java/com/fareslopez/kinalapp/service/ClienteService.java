@@ -25,23 +25,23 @@ public class ClienteService implements IClienteService {
     }
 
     @Override
-    public Optional<Cliente> buscarPorDpi(String dpi){
+    public Optional<Cliente> buscarPorDpi(int dpi){
         return clienteRepository.findById(dpi);
     }
 
     @Override
-    public Cliente actualizar(String dpi, Cliente cliente){
-        cliente.setDPICliente(dpi);
+    public Cliente actualizar(int dpi, Cliente cliente){
+        cliente.setDpiCliente(dpi);
         return clienteRepository.save(cliente);
     }
 
     @Override
-    public void eliminar(String dpi){
+    public void eliminar(int dpi){
         clienteRepository.deleteById(dpi);
     }
 
     @Override
-    public boolean existeporDPI(String dpi){
+    public boolean existeporDPI(int dpi){
         return clienteRepository.existsById(dpi);
     }
 }
