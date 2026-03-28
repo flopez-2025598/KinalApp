@@ -35,4 +35,13 @@ public class ProductoController {
         }
         return ResponseEntity.ok(productoService.actualizar(id, producto));
     }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable int id){
+        if (!productoService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        productoService.eliminar(id);
+        return ResponseEntity.ok().build();
+    }
+
 }
