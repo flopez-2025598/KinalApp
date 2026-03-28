@@ -35,5 +35,12 @@ public class DetalleVentaController {
         }
         return ResponseEntity.ok(detalleVentaService.actualizar(id, detalleVenta));
     }
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable int id){
+        if (!detalleVentaService.existePorId(id)){
+            return ResponseEntity.notFound().build();
+        }
+        detalleVentaService.eliminar(id);
+        return ResponseEntity.ok().build();
+    }
 }
