@@ -22,4 +22,10 @@ public class VentaController {
     public Venta guardar(@RequestBody Venta venta){
         return ventaService.guardar(venta);
     }
+    @GetMapping("/{id}")
+    public ResponseEntity<Venta> buscarPorId(@PathVariable int id){
+        return ventaService.buscarPorId(id)
+                .map(venta -> ResponseEntity.ok(venta))
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
