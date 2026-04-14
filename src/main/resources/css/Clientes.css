@@ -1,0 +1,143 @@
+/* REGLAS GENERALES
+   Cosas que afectan a toda la página
+*/
+body {
+    font-family: Arial, sans-serif;  /* Una letra sencilla que todos tienen */
+    background-color: #f4f4f4;      /* Un color gris clarito para el fondo */
+    color: #333;                    /* Color de letra gris oscuro (casi negro) */
+    margin: 0;                      /* Quita los espacios que el navegador pone por defecto */
+    padding: 0;
+}
+
+/* CONTENEDOR PRINCIPAL
+   Es el cuadro que envuelve todo el contenido para que no toque los bordes
+*/
+.main-container {
+    width: 80%;                     /* Ocupa el 80% del ancho de la pantalla */
+    margin: 20px auto;              /* 20px de espacio arriba/abajo y centrado a los lados */
+    background-color: white;        /* Fondo blanco para que resalte */
+    padding: 20px;                  /* Espacio interno para que el texto no toque los bordes */
+    border: 1px solid #ccc;         /* Un borde gris finito */
+}
+
+/* ENCABEZADO Y NAVEGACIÓN
+*/
+header {
+    background-color: #333;         /* Fondo oscuro para el menú */
+    color: white;                   /* Letras blancas */
+    padding: 10px;
+    text-align: center;             /* Centra el título y los links */
+}
+
+.nav-links a {
+    color: white;                   /* Color de los enlaces */
+    text-decoration: none;          /* Quita el subrayado de los links */
+    margin: 0 10px;                 /* Espacio entre cada link */
+}
+
+.nav-links a:hover {
+    text-decoration: underline;     /* Se subraya solo cuando pasas el ratón */
+}
+
+/* FORMULARIO
+   Para que los campos se vean ordenados
+*/
+.form-section {
+    margin-bottom: 30px;            /* Separa el formulario de la tabla */
+    padding: 15px;
+    border-bottom: 2px solid #eee;  /* Una línea divisoria al final */
+}
+
+/* Cada grupo (label + input) */
+.field-group {
+    margin-bottom: 15px;            /* Espacio entre cada renglón del formulario */
+}
+
+/* Las etiquetas (nombres de los campos) */
+label {
+    display: block;                 /* Hace que el nombre esté ARRIBA del cuadro */
+    font-weight: bold;              /* Pone la letra en negrita */
+    margin-bottom: 5px;
+}
+
+/* Los cuadros de texto (inputs) y el selector */
+input, select {
+    width: 100%;                    /* Que ocupen todo el ancho disponible */
+    padding: 8px;                   /* Que sean más altos para que sea fácil escribir */
+    border: 1px solid #ccc;         /* Borde gris */
+    border-radius: 4px;             /* Esquinas un poco redondeadas */
+}
+
+/* TABLAS
+*/
+table {
+    width: 100%;                    /* La tabla ocupa todo el ancho */
+    border-collapse: collapse;      /* Hace que las líneas de la tabla sean simples */
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ddd;         /* Bordes para cada celda */
+    padding: 10px;                  /* Espacio dentro de cada celda */
+    text-align: left;               /* Texto alineado a la izquierda */
+}
+
+/* Color de fondo para los encabezados de la tabla */
+th {
+    background-color: #eee;
+}
+
+/* BOTONES
+*/
+.btn {
+    padding: 10px 15px;             /* Tamaño del botón */
+    cursor: pointer;                /* Cambia el ratón a una "manita" */
+    border: none;                   /* Quita el borde feo por defecto */
+    border-radius: 4px;             /* Esquinas redondas */
+    margin-right: 5px;
+}
+
+/* Botón Guardar (Verde) */
+.btn--primary {
+    background-color: #28a745;
+    color: white;
+}
+
+/* Botón Limpiar o Recargar (Gris) */
+.btn--secondary, .btn--ghost {
+    background-color: #6c757d;
+    color: white;
+}
+
+/* Botón Eliminar (Rojo) */
+.btn--danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* MODALES (VENTANAS EMERGENTES)
+   Muy básico para que entiendas el concepto
+*/
+.modal-overlay {
+    display: none;                  /* POR DEFECTO ESTÁN OCULTOS */
+    position: fixed;                /* Se quedan quietos aunque muevas el scroll */
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.5); /* Fondo negro transparente */
+    z-index: 1000;                  /* Se pone por encima de todo */
+}
+
+/* El cuadro blanco del modal */
+.modal-box {
+    background-color: white;
+    width: 300px;
+    margin: 100px auto;             /* Baja el cuadro y lo centra */
+    padding: 20px;
+    text-align: center;
+    border-radius: 8px;
+}
+
+/* Clase para mostrar el modal desde JavaScript */
+.modal-overlay.active {
+    display: block;                 /* Cuando JS pone 'active', se vuelve visible */
+}
