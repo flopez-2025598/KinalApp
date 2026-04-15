@@ -1,6 +1,7 @@
-/* REGLAS GENERALES
-   Mismo estilo base que Clientes
-*/
+/* ============================================================
+   Usuarios.css — KinalApp
+   ============================================================ */
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -9,11 +10,9 @@ body {
     padding: 0;
 }
 
-/* ---- ENCABEZADO ----
-   Color verde para identificar el módulo de Productos
-*/
+/* ---- ENCABEZADO ---- */
 .page-header {
-    background-color: #1b5e20; /* Verde oscuro */
+    background-color: #1b5e20;
     color: white;
     padding: 20px;
     text-align: center;
@@ -33,7 +32,8 @@ body {
     font-size: 0.9rem;
 }
 
-.nav-links a:hover, .nav-link.active {
+.nav-links a:hover,
+.nav-link.active {
     text-decoration: underline;
     font-weight: bold;
 }
@@ -49,7 +49,7 @@ body {
     border-radius: 8px;
 }
 
-/* ---- SECCIONES Y GRID ---- */
+/* ---- SECCIONES ---- */
 .form-section {
     margin-bottom: 30px;
     padding-bottom: 20px;
@@ -63,7 +63,6 @@ body {
     text-transform: uppercase;
 }
 
-/* Grid de 2 columnas para el formulario */
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -74,8 +73,21 @@ body {
     grid-column: 1 / -1;
 }
 
-/* ---- INPUTS Y ETIQUETAS ---- */
-label {
+.form-actions {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+}
+
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+/* ---- INPUTS ---- */
+label, .field-label {
     display: block;
     font-weight: bold;
     margin-bottom: 5px;
@@ -87,7 +99,7 @@ label {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
-    box-sizing: border-box; /* Evita que el input se salga del cuadro */
+    box-sizing: border-box;
 }
 
 .field-input:focus {
@@ -95,9 +107,16 @@ label {
     outline: none;
 }
 
+.field-hint {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 3px;
+    display: block;
+}
+
 /* ---- TABLAS ---- */
 .table-wrapper {
-    overflow-x: auto; /* Permite scroll si la tabla es muy ancha */
+    overflow-x: auto;
 }
 
 table {
@@ -113,14 +132,8 @@ th, td {
 }
 
 th {
-    background-color: #e8f5e9; /* Fondo verde clarito */
+    background-color: #e8f5e9;
     color: #1b5e20;
-}
-
-/* Celda de precio resaltada */
-.price-cell {
-    font-weight: bold;
-    color: #28a745;
 }
 
 /* ---- BOTONES ---- */
@@ -130,27 +143,73 @@ th {
     border: none;
     border-radius: 4px;
     font-weight: bold;
-    transition: 0.2s;
+    transition: background-color 0.2s;
+}
+
+/* Tamaño pequeño para botones dentro de la tabla */
+.btn--sm {
+    padding: 5px 10px;
+    font-size: 0.82rem;
 }
 
 .btn--primary {
     background-color: #28a745;
     color: white;
 }
+.btn--primary:hover { background-color: #218838; }
 
-.btn--primary:hover {
-    background-color: #218838;
-}
-
-.btn--secondary, .btn--ghost {
+.btn--secondary,
+.btn--ghost {
     background-color: #6c757d;
     color: white;
 }
+.btn--secondary:hover,
+.btn--ghost:hover { background-color: #5a6268; }
 
 .btn--danger {
     background-color: #dc3545;
     color: white;
 }
+.btn--danger:hover { background-color: #c82333; }
+
+/* Botones de fila alineados horizontalmente */
+.row-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+/* ---- BADGES (rol y estado) ---- */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Roles */
+.badge--admin     { background-color: #d1ecf1; color: #0c5460; }
+.badge--vendedor  { background-color: #fff3cd; color: #856404; }
+.badge--bodeguero { background-color: #e2d9f3; color: #4a235a; }
+.badge--otro      { background-color: #e2e3e5; color: #383d41; }
+
+/* Estado */
+.badge--active   { background-color: #d4edda; color: #155724; }
+.badge--inactive { background-color: #f8d7da; color: #721c24; }
+
+/* ---- ESTADO VACÍO ---- */
+.empty-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px;
+    color: #aaa;
+}
+
+.empty-icon { font-size: 2.5rem; margin-bottom: 10px; }
 
 /* ---- MODALES ---- */
 .modal-overlay {
@@ -174,12 +233,46 @@ th {
     border-radius: 8px;
     text-align: center;
     max-width: 400px;
+    width: 90%;
     border-top: 6px solid #28a745;
 }
 
+.modal-box--danger { border-top-color: #dc3545; }
+.modal-box--warning { border-top-color: #ffc107; }
+
+.modal-icon    { font-size: 2.5rem; margin-bottom: 10px; }
+.modal-title   { margin: 0 0 10px; }
+.modal-message { color: #555; }
+.modal-detail  { font-size: 0.85rem; color: #888; }
+
+.modal-actions {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+/* ---- TOAST ---- */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 9999;
+}
+
+.toast--visible  { opacity: 1; }
+.toast--success  { background-color: #28a745; }
+.toast--error    { background-color: #dc3545; }
+
 /* ---- RESPONSIVE ---- */
 @media (max-width: 600px) {
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
+    .form-grid { grid-template-columns: 1fr; }
+    .main-container { width: 95%; }
 }
