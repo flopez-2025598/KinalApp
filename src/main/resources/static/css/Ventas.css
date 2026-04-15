@@ -1,0 +1,205 @@
+/* REGLAS GENERALES
+   Mismo estilo base que Clientes y Productos
+*/
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    color: #333;
+    margin: 0;
+    padding: 0;
+}
+
+/* ---- ENCABEZADO ----
+   Color NARANJA para identificar el módulo de Ventas
+*/
+.page-header {
+    background-color: #e65100; /* Naranja profundo */
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+.brand {
+    font-weight: bold;
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    margin: 0 10px;
+    font-size: 0.9rem;
+}
+
+.nav-links a:hover, .nav-link.active {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+/* ---- CONTENEDOR PRINCIPAL ---- */
+.main-container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 20px auto;
+    background-color: white;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+/* ---- CHIPS DE INFORMACIÓN (PK/FK) ----
+   Mantiene la ayuda visual para llaves primarias y foráneas
+*/
+.keys-info {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #fff3e0; /* Naranja muy clarito */
+    border-radius: 6px;
+}
+
+.key-chip {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: bold;
+}
+
+.key-chip--pk {
+    background-color: #ffb74d;
+    color: #e65100;
+    border: 1px solid #e65100;
+}
+
+.key-chip--fk {
+    background-color: #90caf9;
+    color: #0d47a1;
+    border: 1px solid #0d47a1;
+}
+
+/* ---- FORMULARIO Y GRID ---- */
+.form-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #eee;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.field-group--full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.field-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* Estilo para campos que son llaves foráneas */
+.field-input.fk-locked {
+    border-left: 5px solid #2196f3; /* Borde azul indicativo */
+}
+
+/* ---- TABLAS ---- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #fff3e0;
+    color: #e65100;
+}
+
+.price-cell {
+    font-weight: bold;
+    color: #e65100;
+}
+
+/* Celda de llave foránea */
+.fk-cell {
+    color: #1565c0;
+    font-style: italic;
+}
+
+/* ---- BOTONES ---- */
+.btn {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.btn--primary {
+    background-color: #ff8c00;
+    color: white;
+}
+
+.btn--primary:hover {
+    background-color: #e67e00;
+}
+
+.btn--secondary, .btn--ghost {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn--danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* ---- MODALES ---- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-box {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 450px;
+    border-top: 6px solid #ff8c00;
+}
+
+/* ---- RESPONSIVE ---- */
+@media (max-width: 600px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
