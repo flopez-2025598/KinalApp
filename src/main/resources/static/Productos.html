@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Productos</title>
+    <!-- Mismas fuentes que el resto de la app para consistencia visual -->
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <!-- CSS específico de productos -->
+    <link rel="stylesheet" href="css/productos.css"/>
+</head>
+<body>
+
+<!-- ENCABEZADO con navegación entre módulos -->
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <div class="nav-links">
+            <a href="clientes.html"      class="nav-link">Clientes</a>
+            <a href="productos.html"     class="nav-link active">Productos</a>
+            <a href="usuarios.html"      class="nav-link">Usuarios</a>
+            <a href="ventas.html"        class="nav-link">Ventas</a>
+            <a href="detalleventas.html" class="nav-link">Detalle Ventas</a>
+        </div>
+    </nav>
+    <div class="header-content">
+        <h1 class="page-title">Productos</h1>
+        <p class="page-subtitle">Gestión de inventario de productos</p>
+    </div>
+</header>
+
+<main class="main-container">
+
+    <!-- FORMULARIO: crear o editar producto -->
+    <section class="form-section">
+        <h2 class="section-title">Registrar / Editar Producto</h2>
+
+        <div class="form-grid">
+
+            <!-- Código Producto: LLAVE PRIMARIA.
+                 Se deshabilita en modo edición para proteger la integridad.
+                 DetalleVenta usa codigo_producto como llave foránea. -->
+            <div class="field-group">
+                <label class="field-label" for="codigoProducto">Código Producto <span class="required">*</span></label>
+                <input class="field-input" type="number" id="codigoProducto" placeholder="Código único"/>
+                <span class="field-hint" id="codigoHint"></span>
+            </div>
+
+            <!-- Nombre del producto -->
+            <div class="field-group">
+                <label class="field-label" for="nombreProducto">Nombre Producto <span class="required">*</span></label>
+                <input class="field-input" type="text" id="nombreProducto" placeholder="Nombre del producto"/>
+            </div>
+
+            <!-- Precio: BigDecimal en el backend → number con step en el front
+                 step="0.01" permite ingresar centavos (ej. 25.99) -->
+            <div class="field-group">
+                <label class="field-label" for="precio">Precio (Q) <span class="required">*</span></label>
+                <input class="field-input" type="number" id="precio" placeholder="0.00" step="0.01" min="0"/>
+            </div>
+
+            <!-- Stock: cantidad disponible en inventario -->
+            <div class="field-group">
+                <label class="field-label" for="stock">Stock <span class="required">*</span></label>
+                <input class="field-input" type="number" id="stock" placeholder="0" min="0"/>
+            </div>
+
+            <!-- Estado del producto -->
+            <div class="field-group">
+                <label class="field-label" for="estado">Estado <span class="required">*</span></label>
+                <select class="field-input field-select" id="estado">
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn--primary" onclick="guardarProducto()">
+                <span class="btn-icon">💾</span> Guardar
+            </button>
+            <button class="btn btn--ghost" onclick="limpiarFormulario()">
+                <span class="btn-icon">✕</span> Limpiar
+            </button>
+        </div>
+    </section>
+
+    <!-- TABLA de productos -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="section-title">Listado de Productos</h2>
+            <button class="btn btn--secondary" onclick="cargarProductos()">
+                <span class="btn-icon">↻</span> Recargar
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>Precio</th>
+                    <th>Stock</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <!-- El cuerpo se llena dinámicamente con JS -->
+                <tbody id="tablaProductos"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <span class="empty-icon">📦</span>
+            <p>No hay productos registrados</p>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL: advertencia sobre llave primaria/foránea -->
+<div class="modal-overlay" id="modalLlavePrimaria">
+    <div class="modal-box modal-box--warning">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Acción No Permitida</h3>
+        <p class="modal-message">
+            El <strong>Código Producto</strong> es la llave primaria.<br/>
+            <span class="modal-detail">La tabla DetalleVenta usa este código como llave foránea (Productos_codigo_producto). Cambiarlo rompería la integridad referencial. Solo se permiten editar los demás campos.</span>
+        </p>
+        <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
+    </div>
+</div>
+
+<!-- MODAL: confirmar eliminación -->
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box modal-box--danger">
+        <div class="modal-icon">🗑️</div>
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">¿Eliminar este producto?<br/>
+            <span class="modal-detail">Si tiene detalles de venta asociados, la eliminación puede fallar.</span>
+        </p>
+        <div class="modal-actions">
+            <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Notificación flotante -->
+<div class="toast" id="toast"></div>
+
+<!-- JavaScript específico de productos -->
+<script src="productos.js"></script>
+</body>
+</html>
