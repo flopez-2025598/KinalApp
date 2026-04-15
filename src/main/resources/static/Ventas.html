@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="css/ventas.css"/>
+</head>
+<body>
+
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <div class="nav-links">
+            <a href="clientes.html"      class="nav-link">Clientes</a>
+            <a href="productos.html"     class="nav-link">Productos</a>
+            <a href="usuarios.html"      class="nav-link">Usuarios</a>
+            <a href="ventas.html"        class="nav-link active">Ventas</a>
+            <a href="detalleventas.html" class="nav-link">Detalle Ventas</a>
+        </div>
+    </nav>
+    <div class="header-content">
+        <h1 class="page-title">Ventas</h1>
+        <p class="page-subtitle">Registro y consulta de ventas realizadas</p>
+    </div>
+</header>
+
+<main class="main-container">
+
+    <!-- ============================================================
+         FORMULARIO DE VENTA
+
+         LLAVES:
+         - codigo_venta           → LLAVE PRIMARIA (se bloquea al editar)
+         - Clientes_dpi_cliente   → LLAVE FORÁNEA hacia Clientes (se bloquea al editar)
+         - Usuarios_codigo_usuario → LLAVE FORÁNEA hacia Usuarios (se bloquea al editar)
+
+         Las llaves foráneas NO se pueden editar para mantener
+         la integridad referencial de la base de datos.
+         ============================================================ -->
+    <section class="form-section">
+        <h2 class="section-title">Registrar / Editar Venta</h2>
+
+        <div class="form-grid">
+
+            <!-- Código Venta: LLAVE PRIMARIA. Bloqueado en modo edición.
+                 DetalleVenta usa este código como foránea. -->
+            <div class="field-group">
+                <label class="field-label" for="codigoVenta">Código Venta <span class="required">*</span></label>
+                <input class="field-input" type="number" id="codigoVenta" placeholder="Código único"/>
+                <span class="field-hint" id="codigoVentaHint"></span>
+            </div>
+
+            <!-- Fecha de la venta (LocalDate en Java → date en HTML) -->
+            <div class="field-group">
+                <label class="field-label" for="fechaVenta">Fecha de Venta <span class="required">*</span></label>
+                <input class="field-input" type="date" id="fechaVenta"/>
+            </div>
+
+            <!-- Total: BigDecimal en Java → number con decimales -->
+            <div class="field-group">
+                <label class="field-label" for="total">Total (Q) <span class="required">*</span></label>
+                <input class="field-input" type="number" id="total" placeholder="0.00" step="0.01" min="0"/>
+            </div>
+
+            <!-- Estado -->
+            <div class="field-group">
+                <label class="field-label" for="estado">Estado <span class="required">*</span></label>
+                <select class="field-input field-select" id="estado">
+                    <option value="1">Activa</option>
+                    <option value="0">Anulada</option>
+                </select>
+            </div>
+
+            <!-- DPI del cliente: LLAVE FORÁNEA hacia Clientes.
+                 BLOQUEADA en modo edición para proteger la integridad. -->
+            <div class="field-group">
+                <label class="field-label" for="clientesDpiCliente">
+                    DPI Cliente <span class="required">*</span>
+                </label>
+                <input class="field-input" type="number" id="clientesDpiCliente" placeholder="DPI del cliente"/>
+                <span class="field-hint" id="dpiClienteHint"></span>
+            </div>
+
+            <!-- Código del usuario vendedor: LLAVE FORÁNEA hacia Usuarios.
+                 BLOQUEADA en modo edición. -->
+            <div class="field-group">
+                <label class="field-label" for="usuariosCodigoUsuario">
+                    Código Usuario  <span class="required">*</span>
+                </label>
+                <input class="field-input" type="number" id="usuariosCodigoUsuario" placeholder="Código del usuario"/>
+                <span class="field-hint" id="codigoUsuarioHint"></span>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn--primary" onclick="guardarVenta()">
+                <span class="btn-icon">💾</span> Guardar
+            </button>
+            <button class="btn btn--ghost" onclick="limpiarFormulario()">
+                <span class="btn-icon">✕</span> Limpiar
+            </button>
+        </div>
+    </section>
+
+    <!-- TABLA de ventas -->
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="section-title">Listado de Ventas</h2>
+            <button class="btn btn--secondary" onclick="cargarVentas()">
+                <span class="btn-icon">↻</span> Recargar
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Fecha</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                    <th>DPI Cliente </th>
+                    <th>Cód. Usuario </th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tablaVentas"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <span class="empty-icon">🧾</span>
+            <p>No hay ventas registradas</p>
+        </div>
+    </section>
+
+</main>
+
+<!-- MODAL: advertencia llaves primaria y foráneas -->
+<div class="modal-overlay" id="modalLlaves">
+    <div class="modal-box modal-box--warning">
+        <div class="modal-icon">⚠️</div>
+        <h3 class="modal-title">Acción No Permitida</h3>
+        <p class="modal-message">
+            Esta venta contiene <strong>llaves que no se pueden modificar</strong>:<br/>
+            <span class="modal-detail">
+          <strong>codigo_venta</strong> — Llave primaria. DetalleVenta lo referencia.<br/>
+          <strong>Clientes_dpi_cliente</strong> — Llave foránea hacia Clientes.<br/>
+          <strong>Usuarios_codigo_usuario</strong> — Llave foránea hacia Usuarios.<br/><br/>
+          Modificar cualquiera de estos valores rompería la integridad referencial de la base de datos.
+          Solo se pueden editar: fecha, total y estado.
+        </span>
+        </p>
+        <button class="btn btn--primary" onclick="cerrarModal('modalLlaves')">Entendido</button>
+    </div>
+</div>
+
+<!-- MODAL: confirmar eliminación -->
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box modal-box--danger">
+        <div class="modal-icon">🗑️</div>
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">¿Eliminar esta venta?<br/>
+            <span class="modal-detail">Si tiene detalles de venta asociados, la eliminación fallará por integridad referencial.</span>
+        </p>
+        <div class="modal-actions">
+            <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="js/ventas.js"></script>
+</body>
+</html>
