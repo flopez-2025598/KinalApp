@@ -6,11 +6,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
-    @GetMapping("/")
-    public String inicio() {
-        return "index";
-    }
-
     @GetMapping("/clientes-view")
     public String clientes() {
         return "clientes";
