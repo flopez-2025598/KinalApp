@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KinalApp — Usuarios</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="/css/Usuarios.css"/>
+    <link rel="stylesheet" href="../static/css/Usuarios.css"/>
 </head>
 <body>
 
@@ -13,11 +13,11 @@
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="/clientes-view"     class="nav-link">Clientes</a>
-            <a href="/productos-view"    class="nav-link">Productos</a>
-            <a href="/usuarios-view"     class="nav-link active">Usuarios</a>
-            <a href="/ventas-view"       class="nav-link">Ventas</a>
-            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
+            <a href="clientes.html"      class="nav-link">Clientes</a>
+            <a href="productos.html"     class="nav-link">Productos</a>
+            <a href="usuarios.html"      class="nav-link active">Usuarios</a>
+            <a href="ventas.html"        class="nav-link">Ventas</a>
+            <a href="detalleventas.html" class="nav-link">Detalle Ventas</a>
         </div>
     </nav>
     <div class="header-content">
@@ -28,32 +28,41 @@
 
 <main class="main-container">
 
+    <!-- FORMULARIO: crear o editar usuario
+         NOTA: codigo_usuario es llave primaria Y llave foránea en Ventas
+         (columna Usuarios_codigo_usuario). Por eso se bloquea en edición. -->
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Usuario</h2>
 
         <div class="form-grid">
 
+            <!-- Código Usuario: LLAVE PRIMARIA. Bloqueado en modo edición -->
             <div class="field-group">
                 <label class="field-label" for="codigoUsuario">Código Usuario <span class="required">*</span></label>
                 <input class="field-input" type="number" id="codigoUsuario" placeholder="Código único"/>
                 <span class="field-hint" id="codigoHint"></span>
             </div>
 
+            <!-- Username: mapea al campo "username" en BD -->
             <div class="field-group">
                 <label class="field-label" for="usuario">Username <span class="required">*</span></label>
                 <input class="field-input" type="text" id="usuario" placeholder="Nombre de usuario"/>
             </div>
 
+            <!-- Contraseña: en producción esto debería hashearse en el backend -->
             <div class="field-group">
                 <label class="field-label" for="contrasena">Contraseña <span class="required">*</span></label>
+                <!-- type="password" oculta los caracteres al escribir -->
                 <input class="field-input" type="password" id="contrasena" placeholder="Contraseña"/>
             </div>
 
+            <!-- Email -->
             <div class="field-group">
                 <label class="field-label" for="correo">Email <span class="required">*</span></label>
                 <input class="field-input" type="email" id="correo" placeholder="correo@ejemplo.com"/>
             </div>
 
+            <!-- Rol: define los permisos del usuario en el sistema -->
             <div class="field-group">
                 <label class="field-label" for="rol">Rol <span class="required">*</span></label>
                 <select class="field-input field-select" id="rol">
@@ -63,6 +72,7 @@
                 </select>
             </div>
 
+            <!-- Estado -->
             <div class="field-group">
                 <label class="field-label" for="estado">Estado <span class="required">*</span></label>
                 <select class="field-input field-select" id="estado">
@@ -74,26 +84,22 @@
         </div>
 
         <div class="form-actions">
-            <button class="btn btn--primary" onclick="guardarUsuario()">Guardar</button>
-            <button class="btn btn--ghost"   onclick="limpiarFormulario()">✕ Limpiar</button>
+            <button class="btn btn--primary" onclick="guardarUsuario()">
+                <span class="btn-icon">💾</span> Guardar
+            </button>
+            <button class="btn btn--ghost" onclick="limpiarFormulario()">
+                <span class="btn-icon">✕</span> Limpiar
+            </button>
         </div>
     </section>
 
+    <!-- TABLA de usuarios -->
     <section class="table-section">
         <div class="table-header">
             <h2 class="section-title">Listado de Usuarios</h2>
-            <button class="btn btn--secondary" onclick="cargarUsuarios()">↻ Recargar</button>
-        </div>
-
-        <!-- ✅ BARRA DE BÚSQUEDA POR CÓDIGO -->
-        <div class="search-bar">
-            <input
-                    class="field-input search-input"
-                    type="number"
-                    id="inputBusqueda"
-                    placeholder="🔍  Buscar por Código de Usuario..."
-                    oninput="buscarEnTabla()"
-            />
+            <button class="btn btn--secondary" onclick="cargarUsuarios()">
+                <span class="btn-icon">↻</span> Recargar
+            </button>
         </div>
 
         <div class="table-wrapper">
@@ -113,24 +119,27 @@
         </div>
 
         <div class="empty-state" id="emptyState">
+            <span class="empty-icon">👥</span>
             <p>No hay usuarios registrados</p>
         </div>
     </section>
 
 </main>
 
+<!-- MODAL: advertencia llave primaria -->
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
         <div class="modal-icon">⚠️</div>
         <h3 class="modal-title">Acción No Permitida</h3>
         <p class="modal-message">
             El <strong>Código Usuario</strong> es la llave primaria.<br/>
-            <span class="modal-detail">La tabla Ventas usa este código como llave foránea. Solo se pueden editar los demás campos.</span>
+            <span class="modal-detail">La tabla Ventas usa este código como llave foránea (Usuarios_codigo_usuario). Modificarlo rompería las relaciones existentes en la base de datos.</span>
         </p>
         <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
     </div>
 </div>
 
+<!-- MODAL: confirmar eliminación -->
 <div class="modal-overlay" id="modalEliminar">
     <div class="modal-box modal-box--danger">
         <div class="modal-icon">🗑️</div>
@@ -140,12 +149,12 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
-            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
+            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
         </div>
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="/js/Usuarios.js"></script>
+<script src="js/usuarios.js"></script>
 </body>
 </html>

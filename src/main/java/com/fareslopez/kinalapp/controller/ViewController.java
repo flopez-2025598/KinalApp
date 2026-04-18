@@ -6,6 +6,19 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
+    /* ---- RUTA RAÍZ → redirige al login ---- */
+    @GetMapping("/")
+    public String raiz() {
+        return "redirect:/login-view";
+    }
+
+    /* ---- LOGIN ---- */
+    @GetMapping("/login-view")
+    public String login() {
+        return "login";
+    }
+
+    /* ---- MÓDULOS ---- */
     @GetMapping("/clientes-view")
     public String clientes() {
         return "clientes";
