@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KinalApp — Usuarios</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="css/Usuarios.css"/>
+    <link rel="stylesheet" href="../css/Usuarios.css"/>
 </head>
 <body>
 
@@ -13,11 +13,11 @@
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="clientes.html"      class="nav-link">Clientes</a>
-            <a href="productos.html"     class="nav-link">Productos</a>
-            <a href="usuarios.html"      class="nav-link active">Usuarios</a>
-            <a href="ventas.html"        class="nav-link">Ventas</a>
-            <a href="detalleventas.html" class="nav-link">Detalle Ventas</a>
+            <a href="/clientes-view"      class="nav-link">Clientes</a>
+            <a href="/productos-view"     class="nav-link">Productos</a>
+            <a href="/usuarios-view"      class="nav-link active">Usuarios</a>
+            <a href="/ventas-view"        class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
     </nav>
     <div class="header-content">
@@ -85,7 +85,7 @@
 
         <div class="form-actions">
             <button class="btn btn--primary" onclick="guardarUsuario()">
-                <span class="btn-icon">💾</span> Guardar
+                <span class="btn-icon"></span> Guardar
             </button>
             <button class="btn btn--ghost" onclick="limpiarFormulario()">
                 <span class="btn-icon">✕</span> Limpiar
@@ -119,7 +119,7 @@
         </div>
 
         <div class="empty-state" id="emptyState">
-            <span class="empty-icon">👥</span>
+            <span class="empty-icon"></span>
             <p>No hay usuarios registrados</p>
         </div>
     </section>
