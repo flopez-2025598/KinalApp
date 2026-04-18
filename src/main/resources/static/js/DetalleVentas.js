@@ -1,23 +1,35 @@
-const API_URL = 'http://localhost:8021/detalleventas';
-let codigoEnEdicion = null;
-let codigoParaEliminar = null;
-let _fkProductoGuardado = null;
-let _fkVentaGuardada = null;
+/*
+   DetalleVentas.js — KinalApp Frontend
+
+   Campos editables en modo actualización: cantidad, precioUnitario, subtotal.
+    */
+
+const API_URL = '/detalleventas';
+
+let codigoEnEdicion      = null;
+let codigoParaEliminar   = null;
+let _fkProductoGuardado  = null;
+let _fkVentaGuardada     = null;
 
 document.addEventListener('DOMContentLoaded', cargarDetalles);
 
+/*
+   1. CARGAR TABLA — GET /detalleventas
+  */
 async function cargarDetalles() {
     try {
         const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const detalles = await response.json();
         renderizarTabla(detalles);
     } catch (error) {
+        console.error('Error al cargar detalles:', error);
         mostrarToast('Error al conectar con el servidor', 'error');
     }
 }
 
 function renderizarTabla(detalles) {
-    const tbody = document.getElementById('tablaDetalles');
+    const tbody      = document.getElementById('tablaDetalles');
     const emptyState = document.getElementById('emptyState');
 
     if (detalles.length === 0) {
@@ -33,31 +45,93 @@ function renderizarTabla(detalles) {
             <td>${d.cantidad}</td>
             <td class="price-cell">Q ${parseFloat(d.precioUnitario).toFixed(2)}</td>
             <td class="subtotal-cell">Q ${parseFloat(d.subtotal).toFixed(2)}</td>
-            <td>${d.productoCodigoProducto}</td>
-            <td>${d.ventasCodigoVenta}</td>
+            <td class="fk-cell">🔗 ${d.productoCodigoProducto}</td>
+            <td class="fk-cell">🔗 ${d.ventasCodigoVenta}</td>
             <td>
                 <div class="row-actions">
-                    <button class="btn btn--secondary btn--sm" onclick="cargarEnFormulario(${d.codigoDetalleVenta})">✎</button>
-                    <button class="btn btn--danger btn--sm" onclick="confirmarEliminar(${d.codigoDetalleVenta})">🗑</button>
+                    <button class="btn btn--secondary btn--sm"
+                        onclick="buscarPorId(${d.codigoDetalleVenta})">
+                        🔍 Buscar
+                    </button>
+                    <button class="btn btn--secondary btn--sm"
+                        onclick="cargarEnFormulario(${d.codigoDetalleVenta})">
+                        ✎
+                    </button>
+                    <button class="btn btn--danger btn--sm"
+                        onclick="confirmarEliminar(${d.codigoDetalleVenta})">
+                        🗑
+                    </button>
                 </div>
             </td>
         </tr>
     `).join('');
 }
 
+/*
+   2. BUSCAR POR ID — GET /detalleventas/{id}
+   Muestra los datos en el formulario (solo lectura)
+ */
+async function buscarPorId(id) {
+    try {
+        const res = await fetch(`${API_URL}/${id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        const d = await res.json();
+
+        document.getElementById('codigoDetalleVenta').value       = d.codigoDetalleVenta;
+        document.getElementById('cantidad').value                  = d.cantidad;
+        document.getElementById('precioUnitario').value            = d.precioUnitario;
+        document.getElementById('subtotal').value                  = parseFloat(d.subtotal).toFixed(2);
+        document.getElementById('productoCodigoProducto').value    = d.productoCodigoProducto;
+        document.getElementById('ventasCodigoVenta').value         = d.ventasCodigoVenta;
+
+        // Bloquear PK y FKs en modo búsqueda
+        document.getElementById('codigoDetalleVenta').disabled      = true;
+        document.getElementById('productoCodigoProducto').disabled  = true;
+        document.getElementById('ventasCodigoVenta').disabled       = true;
+
+        document.getElementById('codigoDetalleHint').textContent = '🔍 Modo búsqueda';
+        document.getElementById('productoHint').textContent      = '🔗 FK → Productos';
+        document.getElementById('ventaHint').textContent         = '🔗 FK → Ventas';
+
+        // No activar modo edición en búsqueda
+        codigoEnEdicion = null;
+
+        mostrarToast(`Detalle #${id} encontrado ✓`, 'success');
+        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('Error al buscar detalle:', error);
+        mostrarToast(`No se encontró el detalle con código ${id}`, 'error');
+    }
+}
+
+/*
+   CÁLCULO DE SUBTOTAL (automático)
+ */
 function calcularSubtotal() {
-    const cant = parseFloat(document.getElementById('cantidad').value) || 0;
+    const cant   = parseFloat(document.getElementById('cantidad').value)       || 0;
     const precio = parseFloat(document.getElementById('precioUnitario').value) || 0;
     document.getElementById('subtotal').value = (cant * precio).toFixed(2);
 }
 
 async function guardarDetalleVenta() {
-    const codigo = codigoEnEdicion !== null ? codigoEnEdicion : parseInt(document.getElementById('codigoDetalleVenta').value);
-    const cantidad = parseInt(document.getElementById('cantidad').value);
+    // En edición la PK viene de la variable, no del input (está deshabilitado)
+    const codigo     = codigoEnEdicion !== null
+        ? codigoEnEdicion
+        : parseInt(document.getElementById('codigoDetalleVenta').value);
+
+    const cantidad   = parseInt(document.getElementById('cantidad').value);
     const precioUnit = parseFloat(document.getElementById('precioUnitario').value);
-    const subtotal = parseFloat(document.getElementById('subtotal').value);
-    const codProd = codigoEnEdicion !== null ? _fkProductoGuardado : parseInt(document.getElementById('productoCodigoProducto').value);
-    const codVen = codigoEnEdicion !== null ? _fkVentaGuardada : parseInt(document.getElementById('ventasCodigoVenta').value);
+    const subtotal   = parseFloat(document.getElementById('subtotal').value);
+
+    // Las FK vienen de variables en memoria en modo edición
+    const codProd = codigoEnEdicion !== null
+        ? _fkProductoGuardado
+        : parseInt(document.getElementById('productoCodigoProducto').value);
+    const codVen  = codigoEnEdicion !== null
+        ? _fkVentaGuardada
+        : parseInt(document.getElementById('ventasCodigoVenta').value);
 
     if (!codigo || !cantidad || !precioUnit || !codProd || !codVen) {
         mostrarToast('Faltan datos obligatorios', 'error');
@@ -65,81 +139,133 @@ async function guardarDetalleVenta() {
     }
 
     const data = {
-        codigoDetalleVenta: codigo,
-        cantidad: cantidad,
-        precioUnitario: precioUnit,
-        subtotal: subtotal,
-        productoCodigoProducto: codProd,
-        ventasCodigoVenta: codVen
+        codigoDetalleVenta:      codigo,
+        cantidad:                cantidad,
+        precioUnitario:          precioUnit,
+        subtotal:                subtotal,
+        productoCodigoProducto:  codProd,
+        ventasCodigoVenta:       codVen
     };
 
     try {
-        const method = codigoEnEdicion ? 'PUT' : 'POST';
-        const url = codigoEnEdicion ? `${API_URL}/${codigoEnEdicion}` : API_URL;
+        const method = codigoEnEdicion !== null ? 'PUT' : 'POST';
+        const url    = codigoEnEdicion !== null ? `${API_URL}/${codigoEnEdicion}` : API_URL;
+
         const res = await fetch(url, {
-            method: method,
+            method:  method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body:    JSON.stringify(data)
         });
-        if (res.ok) {
-            mostrarToast(codigoEnEdicion ? 'Actualizado' : 'Creado');
-            limpiarFormulario();
-            cargarDetalles();
-        }
-    } catch (e) { mostrarToast('Error al guardar', 'error'); }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        mostrarToast(codigoEnEdicion !== null ? 'Detalle actualizado ✓' : 'Detalle creado ✓', 'success');
+        limpiarFormulario();
+        cargarDetalles();
+
+    } catch (error) {
+        console.error('Error al guardar:', error);
+        mostrarToast('Error al guardar el detalle', 'error');
+    }
 }
 
-async function cargarEnFormulario(codigo) {
+async function cargarEnFormulario(id) {
     try {
-        const res = await fetch(`${API_URL}/${codigo}`);
+        const res = await fetch(`${API_URL}/${id}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
         const d = await res.json();
-        document.getElementById('codigoDetalleVenta').value = d.codigoDetalleVenta;
-        document.getElementById('cantidad').value = d.cantidad;
-        document.getElementById('precioUnitario').value = d.precioUnitario;
-        document.getElementById('subtotal').value = parseFloat(d.subtotal).toFixed(2);
-        document.getElementById('productoCodigoProducto').value = d.productoCodigoProducto;
-        document.getElementById('ventasCodigoVenta').value = d.ventasCodigoVenta;
 
+        document.getElementById('codigoDetalleVenta').value       = d.codigoDetalleVenta;
+        document.getElementById('cantidad').value                  = d.cantidad;
+        document.getElementById('precioUnitario').value            = d.precioUnitario;
+        document.getElementById('subtotal').value                  = parseFloat(d.subtotal).toFixed(2);
+        document.getElementById('productoCodigoProducto').value    = d.productoCodigoProducto;
+        document.getElementById('ventasCodigoVenta').value         = d.ventasCodigoVenta;
+
+        // Guardar FKs antes de bloquear los inputs
         _fkProductoGuardado = d.productoCodigoProducto;
-        _fkVentaGuardada = d.ventasCodigoVenta;
-        codigoEnEdicion = codigo;
+        _fkVentaGuardada    = d.ventasCodigoVenta;
+        codigoEnEdicion     = id;
 
-        document.getElementById('codigoDetalleVenta').disabled = true;
+        // Bloquear PK
+        document.getElementById('codigoDetalleVenta').disabled     = true;
+        document.getElementById('codigoDetalleHint').textContent   = '🔒 PK — no editable';
+
+        // Bloquear FKs — modificarlas cambiaría el producto o la venta a la que
+        // pertenece este detalle, alterando datos históricos de la transacción.
         document.getElementById('productoCodigoProducto').disabled = true;
-        document.getElementById('ventasCodigoVenta').disabled = true;
-    } catch (e) { mostrarToast('Error al cargar', 'error'); }
+        document.getElementById('productoHint').textContent        = '🔗 FK → Productos — no editable';
+
+        document.getElementById('ventasCodigoVenta').disabled      = true;
+        document.getElementById('ventaHint').textContent           = '🔗 FK → Ventas — no editable';
+
+        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (error) {
+        console.error('Error al cargar detalle:', error);
+        mostrarToast('Error al cargar el detalle', 'error');
+    }
 }
 
-function limpiarFormulario() {
-    codigoEnEdicion = null;
-    document.getElementById('codigoDetalleVenta').value = '';
-    document.getElementById('cantidad').value = '';
-    document.getElementById('precioUnitario').value = '';
-    document.getElementById('subtotal').value = '';
-    document.getElementById('productoCodigoProducto').value = '';
-    document.getElementById('ventasCodigoVenta').value = '';
-
-    document.getElementById('codigoDetalleVenta').disabled = false;
-    document.getElementById('productoCodigoProducto').disabled = false;
-    document.getElementById('ventasCodigoVenta').disabled = false;
-}
 
 function confirmarEliminar(id) {
     codigoParaEliminar = id;
     document.getElementById('btnConfirmarEliminar').onclick = eliminarDetalle;
-    document.getElementById('modalEliminar').classList.add('active');
+    abrirModal('modalEliminar');
 }
 
 async function eliminarDetalle() {
     cerrarModal('modalEliminar');
-    await fetch(`${API_URL}/${codigoParaEliminar}`, { method: 'DELETE' });
-    cargarDetalles();
+    if (codigoParaEliminar === null) return;
+
+    try {
+        const res = await fetch(`${API_URL}/${codigoParaEliminar}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        mostrarToast('Detalle eliminado ✓', 'success');
+        cargarDetalles();
+
+    } catch (error) {
+        console.error('Error al eliminar:', error);
+        mostrarToast('Error al eliminar el detalle', 'error');
+    } finally {
+        codigoParaEliminar = null;
+    }
 }
 
+function limpiarFormulario() {
+    codigoEnEdicion     = null;
+    _fkProductoGuardado = null;
+    _fkVentaGuardada    = null;
+
+    ['codigoDetalleVenta', 'cantidad', 'precioUnitario', 'subtotal',
+     'productoCodigoProducto', 'ventasCodigoVenta']
+        .forEach(id => { document.getElementById(id).value = ''; });
+
+    document.getElementById('codigoDetalleVenta').disabled      = false;
+    document.getElementById('productoCodigoProducto').disabled  = false;
+    document.getElementById('ventasCodigoVenta').disabled       = false;
+
+    ['codigoDetalleHint', 'productoHint', 'ventaHint']
+        .forEach(id => { document.getElementById(id).textContent = ''; });
+}
+
+/* ---- MODALES ---- */
+function abrirModal(id)  { document.getElementById(id).classList.add('active'); }
 function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
 
-function mostrarToast(msg) {
+document.addEventListener('click', (e) => {
+    if (e.target.classList.contains('modal-overlay')) {
+        document.querySelectorAll('.modal-overlay.active')
+            .forEach(m => m.classList.remove('active'));
+    }
+});
+
+/* ---- TOAST ---- */
+function mostrarToast(mensaje, tipo = 'success') {
     const t = document.getElementById('toast');
-    t.textContent = msg; t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 3000);
+    t.textContent = mensaje;
+    t.className   = `toast toast--${tipo} toast--visible`;
+    setTimeout(() => { t.className = 'toast'; }, 3000);
 }

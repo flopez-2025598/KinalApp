@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KinalApp — Detalle Ventas</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-    <link rel="stylesheet" href="../css/DetalleVentas.css"/>
+    <link rel="stylesheet" href="/css/DetalleVentas.css"/>
 </head>
 <body>
 
@@ -13,10 +13,10 @@
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="/clientes-view"      class="nav-link">Clientes</a>
-            <a href="/productos-view"     class="nav-link">Productos</a>
-            <a href="/usuarios-view"      class="nav-link">Usuarios</a>
-            <a href="/ventas-view"        class="nav-link">Ventas</a>
+            <a href="/clientes-view"     class="nav-link">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
             <a href="/detalleventa-view" class="nav-link active">Detalle Ventas</a>
         </div>
     </nav>
@@ -31,6 +31,7 @@
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Detalle</h2>
         <div class="form-grid">
+
             <div class="field-group">
                 <label class="field-label" for="codigoDetalleVenta">Código Detalle <span class="required">*</span></label>
                 <input class="field-input" type="number" id="codigoDetalleVenta" placeholder="ID Detalle"/>
@@ -63,11 +64,12 @@
                 <input class="field-input" type="number" id="ventasCodigoVenta" placeholder="ID Venta"/>
                 <span class="field-hint" id="ventaHint"></span>
             </div>
+
         </div>
 
         <div class="form-actions">
             <button class="btn btn--primary" onclick="guardarDetalleVenta()">💾 Guardar</button>
-            <button class="btn btn--ghost" onclick="limpiarFormulario()">✕ Limpiar</button>
+            <button class="btn btn--ghost"   onclick="limpiarFormulario()">✕ Limpiar</button>
         </div>
     </section>
 
@@ -76,6 +78,18 @@
             <h2 class="section-title">Listado de Detalles</h2>
             <button class="btn btn--secondary" onclick="cargarDetalles()">↻ Recargar</button>
         </div>
+
+        <!-- ✅ BARRA DE BÚSQUEDA POR CÓDIGO DE DETALLE -->
+        <div class="search-bar">
+            <input
+                    class="field-input search-input"
+                    type="number"
+                    id="inputBusqueda"
+                    placeholder="🔍  Buscar por Código de Detalle..."
+                    oninput="buscarEnTabla()"
+            />
+        </div>
+
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
@@ -92,10 +106,12 @@
                 <tbody id="tablaDetalles"></tbody>
             </table>
         </div>
+
         <div class="empty-state" id="emptyState">
             <p>No hay detalles registrados</p>
         </div>
     </section>
+
 </main>
 
 <div class="modal-overlay" id="modalEliminar">
@@ -104,12 +120,12 @@
         <p class="modal-message">¿Deseas eliminar este detalle de venta?</p>
         <div class="modal-actions">
             <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
-            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
         </div>
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="../js/DetalleVentas.js"></script>
+<script src="/js/DetalleVentas.js"></script>
 </body>
 </html>

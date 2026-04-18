@@ -141,3 +141,4 @@ th {
 .modal-overlay.active {
     display: block;                 /* Cuando JS pone 'active', se vuelve visible */
 }
+

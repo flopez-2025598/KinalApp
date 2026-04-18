@@ -15,11 +15,11 @@
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="clientes-view" class="nav-link active">Clientes</a>
-            <a href="productos-view" class="nav-link">Productos</a>
-            <a href="usuarios-view" class="nav-link">Usuarios</a>
-            <a href="ventas-view" class="nav-link">Ventas</a>
-            <a href="detalleventa-view" class="nav-link">Detalle Ventas</a>
+            <a href="/clientes-view"     class="nav-link active">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
     </nav>
 
@@ -31,6 +31,7 @@
 
 <main class="main-container">
 
+    <!-- FORMULARIO: crear o editar cliente -->
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Cliente</h2>
 
@@ -97,12 +98,24 @@
         </div>
     </section>
 
+    <!-- TABLA: listado de clientes -->
     <section class="table-section">
         <div class="table-header">
             <h2 class="section-title">Listado de Clientes</h2>
             <button class="btn btn--secondary" onclick="cargarClientes()">
                 Recargar
             </button>
+        </div>
+
+        <!-- ✅ BARRA DE BÚSQUEDA POR DPI -->
+        <div class="search-bar">
+            <input
+                    class="field-input search-input"
+                    type="number"
+                    id="inputBusqueda"
+                    placeholder="🔍  Buscar por DPI..."
+                    oninput="buscarEnTabla()"
+            />
         </div>
 
         <div class="table-wrapper">
@@ -117,8 +130,7 @@
                     <th>Acciones</th>
                 </tr>
                 </thead>
-                <tbody id="tablaClientes">
-                </tbody>
+                <tbody id="tablaClientes"></tbody>
             </table>
         </div>
 
@@ -129,6 +141,7 @@
 
 </main>
 
+<!-- MODAL: advertencia llave primaria -->
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
         <h3 class="modal-title">Acción No Permitida</h3>
@@ -140,6 +153,7 @@
     </div>
 </div>
 
+<!-- MODAL: confirmar eliminación -->
 <div class="modal-overlay" id="modalEliminar">
     <div class="modal-box modal-box--danger">
         <h3 class="modal-title">Confirmar Eliminación</h3>

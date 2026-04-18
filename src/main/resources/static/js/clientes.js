@@ -1,149 +1,236 @@
-    /* ==========================================
-       CONFIGURACIÓN Y VARIABLES
-       ========================================== */
+/* ==========================================
+   clientes.js — KinalApp
+   ========================================== */
 
-    // La dirección de tu servidor backend (Spring Boot)
-    const API_URL = 'http://localhost:8021/clientes';
+// ✅ Ruta relativa — sin puerto hardcodeado, funciona en cualquier entorno
+const API_URL = '/clientes';
 
-    // Esta variable nos dice si estamos creando un cliente nuevo (null)
-    // o editando uno que ya existe (guardamos su DPI aquí).
-    let dpiEnEdicion = null;
+let dpiEnEdicion    = null;
+let dpiParaEliminar = null;
 
-    /* ==========================================
-       AL CARGAR LA PÁGINA
-       ========================================== */
+// Lista completa en memoria (para filtrar sin re-fetch)
+let _todosLosClientes = [];
 
-    // Apenas se abre la página, pedimos los datos al servidor
-    document.addEventListener('DOMContentLoaded', () => {
-        cargarClientes();
-    });
+/* ---- INICIO ---- */
+document.addEventListener('DOMContentLoaded', () => {
+    cargarClientes();
+});
 
-    /* ==========================================
-       1. LEER (MOSTRAR CLIENTES)
-       ========================================== */
+/* ==========================================
+   1. CARGAR TABLA — GET /clientes
+   ========================================== */
+async function cargarClientes() {
+    try {
+        const res = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        _todosLosClientes = await res.json();
+        renderizarTabla(_todosLosClientes);
+    } catch (err) {
+        console.error('Error al cargar clientes:', err);
+        mostrarToast('No se pudo conectar con el servidor', 'error');
+    }
+}
 
-    async function cargarClientes() {
-        // fetch() es como hacer una llamada telefónica al servidor
-        const respuesta = await fetch(API_URL);
-        const listaDeClientes = await respuesta.json(); // Convertimos la respuesta en una lista
+/* ==========================================
+   RENDERIZAR TABLA
+   ========================================== */
+function renderizarTabla(lista) {
+    const tbody      = document.getElementById('tablaClientes');
+    const emptyState = document.getElementById('emptyState');
 
-        const tabla = document.getElementById('tablaClientes');
-        tabla.innerHTML = ''; // Limpiamos la tabla antes de llenarla
+    if (!lista || lista.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+    }
+    emptyState.style.display = 'none';
 
-        // Recorremos la lista y creamos una fila por cada cliente
-        listaDeClientes.forEach(cliente => {
-            tabla.innerHTML += `
-                <tr>
-                    <td>${cliente.dpiCliente}</td>
-                    <td>${cliente.nombreCliente}</td>
-                    <td>${cliente.apellidoCliente}</td>
-                    <td>${cliente.direccion}</td>
-                    <td>${cliente.estado == 1 ? 'Activo' : 'Inactivo'}</td>
-                    <td>
-                        <button onclick="prepararEdicion(${cliente.dpiCliente})">Editar</button>
-                        <button onclick="eliminarCliente(${cliente.dpiCliente})">Eliminar</button>
-                    </td>
-                </tr>
-            `;
-        });
+    tbody.innerHTML = lista.map(c => `
+        <tr>
+            <td><strong>${c.dpiCliente}</strong></td>
+            <td>${c.nombreCliente}</td>
+            <td>${c.apellidoCliente}</td>
+            <td>${c.direccion || '—'}</td>
+            <td>
+                <span class="badge ${c.estado === 1 ? 'badge--active' : 'badge--inactive'}">
+                    ${c.estado === 1 ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>
+                <div class="row-actions">
+                    <button class="btn btn--secondary btn--sm"
+                        onclick="prepararEdicion(${c.dpiCliente})">✎ Editar</button>
+                    <button class="btn btn--danger btn--sm"
+                        onclick="confirmarEliminar(${c.dpiCliente})">🗑</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/* ==========================================
+   BARRA DE BÚSQUEDA — filtra por DPI
+   Llamada desde oninput="buscarEnTabla()" en el HTML
+   ========================================== */
+function buscarEnTabla() {
+    const query = document.getElementById('inputBusqueda').value.trim();
+
+    if (query === '') {
+        renderizarTabla(_todosLosClientes);
+        return;
     }
 
-    /* ==========================================
-       2. GUARDAR (CREAR O ACTUALIZAR)
-       ========================================== */
+    const resultados = _todosLosClientes.filter(c =>
+        String(c.dpiCliente).includes(query)
+    );
 
-    async function guardarCliente() {
-        // Obtenemos los datos que el usuario escribió en los cuadritos (inputs)
-        const dpi = document.getElementById('dpiCliente').value;
-        const nombre = document.getElementById('nombreCliente').value;
-        const apellido = document.getElementById('apellidoCliente').value;
-        const direccion = document.getElementById('direccion').value;
-        const estado = document.getElementById('estado').value;
+    renderizarTabla(resultados);
 
-        // Creamos un objeto con esos datos
-        const cliente = {
-            dpiCliente: dpi,
-            nombreCliente: nombre,
-            apellidoCliente: apellido,
-            direccion: direccion,
-            estado: parseInt(estado)
-        };
+    if (resultados.length === 0) {
+        mostrarToast(`No se encontró ningún cliente con DPI "${query}"`, 'error');
+    }
+}
 
-        let metodoHttp = '';
-        let urlFinal = '';
+/* ==========================================
+   2. GUARDAR — POST (crear) o PUT (actualizar)
+   BUG FIX: antes usaba http://localhost:8021 → ahora ruta relativa /clientes
+   ========================================== */
+async function guardarCliente() {
+    const dpi      = document.getElementById('dpiCliente').value.trim();
+    const nombre   = document.getElementById('nombreCliente').value.trim();
+    const apellido = document.getElementById('apellidoCliente').value.trim();
+    const direccion = document.getElementById('direccion').value.trim();
+    const estado   = parseInt(document.getElementById('estado').value);
+
+    if (!dpi || !nombre || !apellido) {
+        mostrarToast('DPI, nombre y apellido son obligatorios', 'error');
+        return;
+    }
+
+    const cliente = {
+        dpiCliente:      parseInt(dpi),
+        nombreCliente:   nombre,
+        apellidoCliente: apellido,
+        direccion:       direccion,
+        estado:          estado
+    };
+
+    try {
+        let res;
 
         if (dpiEnEdicion === null) {
-            // Si no estamos editando, usamos POST para CREAR
-            metodoHttp = 'POST';
-            urlFinal = API_URL;
-        } else {
-            // Si hay un DPI guardado, usamos PUT para ACTUALIZAR ese cliente
-            metodoHttp = 'PUT';
-            urlFinal = API_URL + '/' + dpiEnEdicion;
-        }
-
-        // Enviamos los datos al servidor
-        await fetch(urlFinal, {
-            method: metodoHttp,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(cliente) // Convertimos el objeto a texto para enviarlo
-        });
-
-        alert("¡Operación exitosa!");
-        limpiarFormulario();
-        cargarClientes(); // Recargamos la tabla para ver los cambios
-    }
-
-    /* ==========================================
-       3. EDITAR (PREPARAR EL FORMULARIO)
-       ========================================== */
-
-    async function prepararEdicion(dpi) {
-        // Pedimos al servidor los datos de ese cliente específico
-        const respuesta = await fetch(API_URL + '/' + dpi);
-        const cliente = await respuesta.json();
-
-        // Ponemos los datos del cliente en los cuadros de texto
-        document.getElementById('dpiCliente').value = cliente.dpiCliente;
-        document.getElementById('nombreCliente').value = cliente.nombreCliente;
-        document.getElementById('apellidoCliente').value = cliente.apellidoCliente;
-        document.getElementById('direccion').value = cliente.direccion;
-        document.getElementById('estado').value = cliente.estado;
-
-        // IMPORTANTE: Bloqueamos el DPI para que no lo cambien (es la llave primaria)
-        document.getElementById('dpiCliente').disabled = true;
-
-        // Guardamos el DPI para saber que estamos editando
-        dpiEnEdicion = dpi;
-    }
-
-    /* ==========================================
-       4. ELIMINAR
-       ========================================== */
-
-    async function eliminarCliente(dpi) {
-        // Pedimos confirmación al usuario
-        if (confirm("¿Seguro que quieres eliminar este cliente?")) {
-            await fetch(API_URL + '/' + dpi, {
-                method: 'DELETE'
+            res = await fetch(API_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(cliente)
             });
-            cargarClientes(); // Recargamos la lista
+        } else {
+            res = await fetch(`${API_URL}/${dpiEnEdicion}`, {
+                method:  'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify(cliente)
+            });
         }
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+        mostrarToast(dpiEnEdicion === null ? 'Cliente creado ✓' : 'Cliente actualizado ✓', 'success');
+        limpiarFormulario();
+        cargarClientes();
+
+    } catch (err) {
+        console.error('Error al guardar cliente:', err);
+        mostrarToast('Error al guardar el cliente', 'error');
     }
+}
 
-    /* ==========================================
-       UTILIDADES
-       ========================================== */
+/* ==========================================
+   3. EDITAR — carga datos y bloquea la PK
+   dpiCliente es PK y FK en Ventas → no se puede cambiar
+   ========================================== */
+async function prepararEdicion(dpi) {
+    try {
+        const res = await fetch(`${API_URL}/${dpi}`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const c = await res.json();
 
-    function limpiarFormulario() {
-        // Vaciamos todos los cuadros de texto
-        document.getElementById('dpiCliente').value = '';
-        document.getElementById('nombreCliente').value = '';
-        document.getElementById('apellidoCliente').value = '';
-        document.getElementById('direccion').value = '';
-        document.getElementById('estado').value = '1';
+        document.getElementById('dpiCliente').value      = c.dpiCliente;
+        document.getElementById('nombreCliente').value   = c.nombreCliente;
+        document.getElementById('apellidoCliente').value = c.apellidoCliente;
+        document.getElementById('direccion').value       = c.direccion || '';
+        document.getElementById('estado').value          = c.estado;
 
-        // Volvemos a habilitar el DPI para nuevos registros
-        document.getElementById('dpiCliente').disabled = false;
-        dpiEnEdicion = null;
+        document.getElementById('dpiCliente').disabled = true;
+        document.getElementById('dpiHint').textContent = '🔒 Llave primaria — no editable (FK en Ventas)';
+
+        dpiEnEdicion = dpi;
+
+        abrirModal('modalLlavePrimaria');
+        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+
+    } catch (err) {
+        console.error('Error al cargar cliente:', err);
+        mostrarToast('Error al cargar el cliente', 'error');
     }
+}
+
+/* ==========================================
+   4. ELIMINAR — DELETE /clientes/{dpi}
+   ========================================== */
+function confirmarEliminar(dpi) {
+    dpiParaEliminar = dpi;
+    document.getElementById('btnConfirmarEliminar').onclick = eliminarCliente;
+    abrirModal('modalEliminar');
+}
+
+async function eliminarCliente() {
+    cerrarModal('modalEliminar');
+    if (dpiParaEliminar === null) return;
+
+    try {
+        const res = await fetch(`${API_URL}/${dpiParaEliminar}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        mostrarToast('Cliente eliminado ✓', 'success');
+        cargarClientes();
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        mostrarToast('Error al eliminar. ¿Tiene ventas asociadas?', 'error');
+    } finally {
+        dpiParaEliminar = null;
+    }
+}
+
+/* ==========================================
+   UTILIDADES
+   ========================================== */
+function limpiarFormulario() {
+    document.getElementById('dpiCliente').value      = '';
+    document.getElementById('nombreCliente').value   = '';
+    document.getElementById('apellidoCliente').value = '';
+    document.getElementById('direccion').value       = '';
+    document.getElementById('estado').value          = '1';
+
+    document.getElementById('dpiCliente').disabled   = false;
+    document.getElementById('dpiHint').textContent   = '';
+
+    dpiEnEdicion = null;
+}
+
+/* ---- MODALES ---- */
+function abrirModal(id)  { document.getElementById(id).classList.add('active'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('modal-overlay')) {
+        document.querySelectorAll('.modal-overlay.active')
+            .forEach(m => m.classList.remove('active'));
+    }
+});
+
+/* ---- TOAST ---- */
+function mostrarToast(mensaje, tipo = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = mensaje;
+    toast.className   = `toast toast--${tipo} toast--visible`;
+    setTimeout(() => { toast.className = 'toast'; }, 3000);
+}

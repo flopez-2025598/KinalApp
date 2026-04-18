@@ -4,22 +4,19 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KinalApp — Productos</title>
-    <!-- Mismas fuentes que el resto de la app para consistencia visual -->
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-    <!-- CSS específico de productos -->
-    <link rel="stylesheet" href="css/productos.css"/>
+    <link rel="stylesheet" href="/css/Productos.css"/>
 </head>
 <body>
-
 
 <header class="page-header">
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="/clientes-view"      class="nav-link">Clientes</a>
-            <a href="/productos-view"     class="nav-link active">Productos</a>
-            <a href="/usuarios-view"      class="nav-link">Usuarios</a>
-            <a href="/ventas-view"        class="nav-link">Ventas</a>
+            <a href="/clientes-view"     class="nav-link">Clientes</a>
+            <a href="/productos-view"    class="nav-link active">Productos</a>
+            <a href="/usuarios-view"     class="nav-link">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
             <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
     </nav>
@@ -31,41 +28,32 @@
 
 <main class="main-container">
 
-    <!-- FORMULARIO: crear o editar producto -->
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Producto</h2>
 
         <div class="form-grid">
 
-            <!-- Código Producto: LLAVE PRIMARIA.
-                 Se deshabilita en modo edición para proteger la integridad.
-                 DetalleVenta usa codigo_producto como llave foránea. -->
             <div class="field-group">
                 <label class="field-label" for="codigoProducto">Código Producto <span class="required">*</span></label>
                 <input class="field-input" type="number" id="codigoProducto" placeholder="Código único"/>
                 <span class="field-hint" id="codigoHint"></span>
             </div>
 
-            <!-- Nombre del producto -->
             <div class="field-group">
                 <label class="field-label" for="nombreProducto">Nombre Producto <span class="required">*</span></label>
                 <input class="field-input" type="text" id="nombreProducto" placeholder="Nombre del producto"/>
             </div>
 
-            <!-- Precio: BigDecimal en el backend → number con step en el front
-                 step="0.01" permite ingresar centavos (ej. 25.99) -->
             <div class="field-group">
                 <label class="field-label" for="precio">Precio (Q) <span class="required">*</span></label>
                 <input class="field-input" type="number" id="precio" placeholder="0.00" step="0.01" min="0"/>
             </div>
 
-            <!-- Stock: cantidad disponible en inventario -->
             <div class="field-group">
                 <label class="field-label" for="stock">Stock <span class="required">*</span></label>
                 <input class="field-input" type="number" id="stock" placeholder="0" min="0"/>
             </div>
 
-            <!-- Estado del producto -->
             <div class="field-group">
                 <label class="field-label" for="estado">Estado <span class="required">*</span></label>
                 <select class="field-input field-select" id="estado">
@@ -86,13 +74,23 @@
         </div>
     </section>
 
-    <!-- TABLA de productos -->
     <section class="table-section">
         <div class="table-header">
             <h2 class="section-title">Listado de Productos</h2>
             <button class="btn btn--secondary" onclick="cargarProductos()">
                 <span class="btn-icon">↻</span> Recargar
             </button>
+        </div>
+
+        <!-- ✅ BARRA DE BÚSQUEDA POR CÓDIGO -->
+        <div class="search-bar">
+            <input
+                    class="field-input search-input"
+                    type="number"
+                    id="inputBusqueda"
+                    placeholder="🔍  Buscar por Código de Producto..."
+                    oninput="buscarEnTabla()"
+            />
         </div>
 
         <div class="table-wrapper">
@@ -107,7 +105,6 @@
                     <th>Acciones</th>
                 </tr>
                 </thead>
-                <!-- El cuerpo se llena dinámicamente con JS -->
                 <tbody id="tablaProductos"></tbody>
             </table>
         </div>
@@ -120,20 +117,18 @@
 
 </main>
 
-<!-- MODAL: advertencia sobre llave primaria/foránea -->
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
         <div class="modal-icon">⚠️</div>
         <h3 class="modal-title">Acción No Permitida</h3>
         <p class="modal-message">
             El <strong>Código Producto</strong> es la llave primaria.<br/>
-            <span class="modal-detail">La tabla DetalleVenta usa este código como llave foránea (Productos_codigo_producto). Cambiarlo rompería la integridad referencial. Solo se permiten editar los demás campos.</span>
+            <span class="modal-detail">La tabla DetalleVenta usa este código como llave foránea. Solo se pueden editar los demás campos.</span>
         </p>
         <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
     </div>
 </div>
 
-<!-- MODAL: confirmar eliminación -->
 <div class="modal-overlay" id="modalEliminar">
     <div class="modal-box modal-box--danger">
         <div class="modal-icon">🗑️</div>
@@ -148,10 +143,7 @@
     </div>
 </div>
 
-<!-- Notificación flotante -->
 <div class="toast" id="toast"></div>
-
-<!-- JavaScript específico de productos -->
-<script src="js/productos.js"></script>
+<script src="/js/Productos.js"></script>
 </body>
 </html>
