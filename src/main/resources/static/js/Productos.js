@@ -1,29 +1,112 @@
-// ─────────────────────────────────────────────
-//  productos.js  —  KinalApp
-//  Corregido: IDs alineados con Productos.html
-// ─────────────────────────────────────────────
+/* ==========================================
+   Productos.js — KinalApp
+   ========================================== */
 
-let modoEdicion = false;
-let idOriginal  = null;
+const API_URL = '/productos';
 
-document.addEventListener("DOMContentLoaded", function () {
+let modoEdicion     = false;
+let idOriginal      = null;
+let codigoAEliminar = null;
+
+let _todosLosProductos = [];
+
+document.addEventListener('DOMContentLoaded', () => {
     cargarProductos();
 });
 
-// ── GUARDAR (crear o actualizar) ──────────────
-// Llamado por onclick="guardarProducto()" del botón en el HTML
+/* ---- CARGAR TABLA ---- */
+async function cargarProductos() {
+    const tabla      = document.getElementById('tablaProductos');
+    const emptyState = document.getElementById('emptyState');
+
+    try {
+        const res  = await fetch(API_URL);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        _todosLosProductos = await res.json();
+
+        tabla.innerHTML = '';
+
+        if (_todosLosProductos.length === 0) {
+            emptyState.style.display = 'block';
+            return;
+        }
+        emptyState.style.display = 'none';
+        renderizarTabla(_todosLosProductos);
+
+    } catch (err) {
+        console.error('Error al cargar productos:', err);
+        mostrarToast('No se pudo cargar la lista de productos.', 'error');
+    }
+}
+
+function renderizarTabla(lista) {
+    const tabla      = document.getElementById('tablaProductos');
+    const emptyState = document.getElementById('emptyState');
+
+    if (!lista || lista.length === 0) {
+        tabla.innerHTML = '';
+        emptyState.style.display = 'block';
+        return;
+    }
+    emptyState.style.display = 'none';
+
+    tabla.innerHTML = lista.map(p => `
+        <tr>
+            <td><strong>${p.codigoProducto}</strong></td>
+            <td>${p.nombreProducto}</td>
+            <td>Q ${parseFloat(p.precio).toFixed(2)}</td>
+            <td>${p.stock}</td>
+            <td>
+                <span class="badge ${p.estado === 1 ? 'badge--active' : 'badge--inactive'}">
+                    ${p.estado === 1 ? 'Activo' : 'Inactivo'}
+                </span>
+            </td>
+            <td>
+                <div class="row-actions">
+                    <button class="btn btn--secondary btn--sm"
+                        onclick="editarProducto(${p.codigoProducto}, '${p.nombreProducto}', ${p.precio}, ${p.stock}, ${p.estado})">
+                        ✏️ Editar
+                    </button>
+                    <button class="btn btn--danger btn--sm"
+                        onclick="confirmarEliminar(${p.codigoProducto})">
+                        🗑️
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+/* ---- BARRA DE BÚSQUEDA por Código ---- */
+function buscarEnTabla() {
+    const query = document.getElementById('inputBusqueda').value.trim();
+
+    if (query === '') {
+        renderizarTabla(_todosLosProductos);
+        return;
+    }
+
+    const resultados = _todosLosProductos.filter(p =>
+        String(p.codigoProducto).includes(query)
+    );
+
+    renderizarTabla(resultados);
+
+    if (resultados.length === 0) {
+        mostrarToast(`No se encontró producto con código "${query}"`, 'error');
+    }
+}
+
+/* ---- GUARDAR ---- */
 async function guardarProducto() {
+    const codigoVal = document.getElementById('codigoProducto').value.trim();
+    const nombre    = document.getElementById('nombreProducto').value.trim();
+    const precioVal = document.getElementById('precio').value.trim();
+    const stockVal  = document.getElementById('stock').value.trim();
+    const estadoVal = document.getElementById('estado').value;
 
-    // Leer valores usando los IDs que SÍ existen en el HTML
-    const codigoVal = document.getElementById("codigoProducto").value.trim();
-    const nombre    = document.getElementById("nombreProducto").value.trim();
-    const precioVal = document.getElementById("precio").value.trim();       // era "precioProducto"
-    const stockVal  = document.getElementById("stock").value.trim();        // era "stockProducto"
-    const estadoVal = document.getElementById("estado").value;              // era "estadoProducto"
-
-    // Validación básica
     if (!codigoVal || !nombre || !precioVal || !stockVal) {
-        mostrarToast("Por favor completa todos los campos obligatorios.", "error");
+        mostrarToast('Por favor completa todos los campos obligatorios.', 'error');
         return;
     }
 
@@ -37,154 +120,111 @@ async function guardarProducto() {
 
     try {
         let res;
-
         if (modoEdicion) {
-            // PUT /productos/{id}
-            res = await fetch(`/productos/${idOriginal}`, {
-                method:  "PUT",
-                headers: { "Content-Type": "application/json" },
+            res = await fetch(`${API_URL}/${idOriginal}`, {
+                method:  'PUT',
+                headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify(producto)
             });
         } else {
-            // POST /productos
-            res = await fetch("/productos", {
-                method:  "POST",
-                headers: { "Content-Type": "application/json" },
+            res = await fetch(API_URL, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify(producto)
             });
         }
 
-        if (!res.ok) {
-            throw new Error(`HTTP ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         limpiarFormulario();
         await cargarProductos();
-        mostrarToast(modoEdicion ? "Producto actualizado ✓" : "Producto guardado ✓", "success");
+        mostrarToast(modoEdicion ? 'Producto actualizado ✓' : 'Producto guardado ✓', 'success');
 
-    } catch (error) {
-        console.error("Error al guardar producto:", error);
-        mostrarToast("Ocurrió un error al guardar el producto.", "error");
+    } catch (err) {
+        console.error('Error al guardar producto:', err);
+        mostrarToast('Ocurrió un error al guardar el producto.', 'error');
     }
 }
 
-// ── CARGAR TABLA ──────────────────────────────
-async function cargarProductos() {
-    const tabla      = document.getElementById("tablaProductos");
-    const emptyState = document.getElementById("emptyState");
-
-    try {
-        const res  = await fetch("/productos");
-        const data = await res.json();
-
-        tabla.innerHTML = "";
-
-        if (data.length === 0) {
-            emptyState.style.display = "block";
-            return;
-        }
-
-        emptyState.style.display = "none";
-
-        data.forEach(p => {
-            tabla.innerHTML += `
-                <tr>
-                    <td>${p.codigoProducto}</td>
-                    <td>${p.nombreProducto}</td>
-                    <td>Q ${parseFloat(p.precio).toFixed(2)}</td>
-                    <td>${p.stock}</td>
-                    <td>${p.estado === 1 ? "Activo" : "Inactivo"}</td>
-                    <td>
-                        <button class="btn btn--secondary"
-                            onclick="editarProducto(${p.codigoProducto}, '${p.nombreProducto}', ${p.precio}, ${p.stock}, ${p.estado})">
-                            ✏️ Editar
-                        </button>
-                        <button class="btn btn--danger"
-                            onclick="confirmarEliminar(${p.codigoProducto})">
-                            🗑️ Eliminar
-                        </button>
-                    </td>
-                </tr>
-            `;
-        });
-
-    } catch (error) {
-        console.error("Error al cargar productos:", error);
-        mostrarToast("No se pudo cargar la lista de productos.", "error");
-    }
-}
-
-// ── EDITAR: poblar formulario ─────────────────
+/* ---- EDITAR ---- */
 function editarProducto(codigo, nombre, precio, stock, estado) {
+    document.getElementById('codigoProducto').value = codigo;
+    document.getElementById('nombreProducto').value = nombre;
+    document.getElementById('precio').value         = precio;
+    document.getElementById('stock').value          = stock;
+    document.getElementById('estado').value         = estado;
 
-    // Mostrar modal de aviso sobre llave primaria
-    abrirModal("modalLlavePrimaria");
-
-    document.getElementById("codigoProducto").value    = codigo;
-    document.getElementById("nombreProducto").value    = nombre;
-    document.getElementById("precio").value            = precio;   // ID correcto
-    document.getElementById("stock").value             = stock;    // ID correcto
-    document.getElementById("estado").value            = estado;   // ID correcto
-
-    // Proteger la llave primaria
-    document.getElementById("codigoProducto").disabled = true;
+    document.getElementById('codigoProducto').disabled = true;
+    document.getElementById('codigoHint').textContent  = '🔒 Llave primaria — no editable (FK en DetalleVenta)';
 
     idOriginal  = codigo;
     modoEdicion = true;
+
+    abrirModal('modalLlavePrimaria');
+    document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── LIMPIAR FORMULARIO ────────────────────────
-// Llamado por onclick="limpiarFormulario()" del botón en el HTML
+/* ---- LIMPIAR ---- */
 function limpiarFormulario() {
-    document.getElementById("codigoProducto").value    = "";
-    document.getElementById("nombreProducto").value    = "";
-    document.getElementById("precio").value            = "";
-    document.getElementById("stock").value             = "";
-    document.getElementById("estado").value            = "1";
+    document.getElementById('codigoProducto').value = '';
+    document.getElementById('nombreProducto').value = '';
+    document.getElementById('precio').value         = '';
+    document.getElementById('stock').value          = '';
+    document.getElementById('estado').value         = '1';
 
-    document.getElementById("codigoProducto").disabled = false;
+    document.getElementById('codigoProducto').disabled = false;
+    document.getElementById('codigoHint').textContent  = '';
 
     modoEdicion = false;
     idOriginal  = null;
 }
 
-// ── ELIMINAR con modal de confirmación ───────
+/* ---- ELIMINAR ---- */
 function confirmarEliminar(codigo) {
-    const btn = document.getElementById("btnConfirmarEliminar");
-    btn.onclick = async function () {
-        cerrarModal("modalEliminar");
-        await eliminarProducto(codigo);
-    };
-    abrirModal("modalEliminar");
+    codigoAEliminar = codigo;
+    document.getElementById('btnConfirmarEliminar').onclick = eliminarProducto;
+    abrirModal('modalEliminar');
 }
 
-async function eliminarProducto(codigo) {
+async function eliminarProducto() {
+    cerrarModal('modalEliminar');
+    if (codigoAEliminar === null) return;
+
     try {
-        const res = await fetch(`/productos/${codigo}`, { method: "DELETE" });
+        const res = await fetch(`${API_URL}/${codigoAEliminar}`, { method: 'DELETE' });
 
         if (res.status === 404) {
-            mostrarToast("El producto no existe o ya fue eliminado.", "error");
+            mostrarToast('El producto no existe o ya fue eliminado.', 'error');
             return;
         }
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
         await cargarProductos();
-        mostrarToast("Producto eliminado ✓", "success");
+        mostrarToast('Producto eliminado ✓', 'success');
 
-    } catch (error) {
-        console.error("Error al eliminar:", error);
-        mostrarToast("Error al eliminar el producto.", "error");
+    } catch (err) {
+        console.error('Error al eliminar:', err);
+        mostrarToast('Error al eliminar. ¿Tiene detalles de venta asociados?', 'error');
+    } finally {
+        codigoAEliminar = null;
     }
 }
 
-// ── MODALES ───────────────────────────────────
-function abrirModal(id)  { document.getElementById(id).classList.add("active"); }
-function cerrarModal(id) { document.getElementById(id).classList.remove("active"); }
+/* ---- MODALES ---- */
+function abrirModal(id)  { document.getElementById(id).classList.add('active'); }
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
 
-// ── TOAST ─────────────────────────────────────
-function mostrarToast(mensaje, tipo = "success") {
-    const toast = document.getElementById("toast");
-    toast.textContent  = mensaje;
-    toast.className    = `toast toast--${tipo} toast--visible`;
-    setTimeout(() => { toast.className = "toast"; }, 3000);
+document.addEventListener('click', e => {
+    if (e.target.classList.contains('modal-overlay')) {
+        document.querySelectorAll('.modal-overlay.active')
+            .forEach(m => m.classList.remove('active'));
+    }
+});
+
+/* ---- TOAST ---- */
+function mostrarToast(mensaje, tipo = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = mensaje;
+    toast.className   = `toast toast--${tipo} toast--visible`;
+    setTimeout(() => { toast.className = 'toast'; }, 3000);
 }

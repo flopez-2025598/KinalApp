@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/login.css"/>
+</head>
+<body>
+
+<div class="scene">
+    <!-- Decoración de fondo -->
+    <div class="bg-grid"></div>
+    <div class="bg-orb bg-orb--1"></div>
+    <div class="bg-orb bg-orb--2"></div>
+
+    <div class="card-wrapper">
+
+        <!-- LOGO / BRAND -->
+        <div class="brand-header">
+            <div class="brand-icon">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                    <rect x="2" y="2" width="10" height="10" rx="2" fill="currentColor" opacity="1"/>
+                    <rect x="16" y="2" width="10" height="10" rx="2" fill="currentColor" opacity="0.6"/>
+                    <rect x="2" y="16" width="10" height="10" rx="2" fill="currentColor" opacity="0.6"/>
+                    <rect x="16" y="16" width="10" height="10" rx="2" fill="currentColor" opacity="0.3"/>
+                </svg>
+            </div>
+            <span class="brand-name">KinalApp</span>
+        </div>
+
+        <!-- TABS -->
+        <div class="tab-bar" role="tablist">
+            <button class="tab active" id="tabLogin" role="tab" aria-selected="true"
+                    onclick="mostrarPanel('login')">
+                Iniciar Sesión
+            </button>
+            <button class="tab" id="tabRegistro" role="tab" aria-selected="false"
+                    onclick="mostrarPanel('registro')">
+                Registrarse
+            </button>
+            <div class="tab-indicator" id="tabIndicator"></div>
+        </div>
+
+        <!-- ========================
+             PANEL LOGIN
+        ========================= -->
+        <div class="panel" id="panelLogin">
+            <p class="panel-subtitle">Ingresa tus credenciales para continuar</p>
+
+            <div class="field-group">
+                <label class="field-label" for="loginUsuario">Usuario</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 20 20" fill="none">
+                        <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M3 17c0-3.314 3.134-6 7-6s7 2.686 7 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                    <input class="field-input" type="text" id="loginUsuario"
+                           placeholder="Nombre de usuario" autocomplete="username"/>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="loginContrasena">Contraseña</label>
+                <div class="input-wrap">
+                    <svg class="input-icon" viewBox="0 0 20 20" fill="none">
+                        <rect x="4" y="9" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <circle cx="10" cy="13.5" r="1" fill="currentColor"/>
+                    </svg>
+                    <input class="field-input" type="password" id="loginContrasena"
+                           placeholder="Contraseña" autocomplete="current-password"/>
+                    <button class="toggle-pass" type="button" onclick="togglePassword('loginContrasena', this)"
+                            title="Mostrar/ocultar contraseña">
+                        <svg class="eye-icon" viewBox="0 0 20 20" fill="none">
+                            <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.5"/>
+                            <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <button class="btn-main" id="btnLogin" onclick="iniciarSesion()">
+                <span class="btn-text">Entrar</span>
+                <span class="btn-loader" hidden>
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </span>
+            </button>
+
+            <p class="switch-hint">
+                ¿No tienes cuenta?
+                <button class="link-btn" onclick="mostrarPanel('registro')">Regístrate aquí</button>
+            </p>
+        </div>
+
+        <!-- ========================
+             PANEL REGISTRO
+        ========================= -->
+        <div class="panel" id="panelRegistro" hidden>
+            <p class="panel-subtitle">Crea tu cuenta en el sistema</p>
+
+            <div class="form-grid-2">
+
+                <div class="field-group">
+                    <label class="field-label" for="regCodigo">Código Usuario <span class="req">*</span></label>
+                    <input class="field-input" type="number" id="regCodigo" placeholder="Ej. 101"/>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="regUsuario">Username <span class="req">*</span></label>
+                    <input class="field-input" type="text" id="regUsuario" placeholder="juan.perez"/>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="regCorreo">Email <span class="req">*</span></label>
+                    <input class="field-input" type="email" id="regCorreo" placeholder="correo@ejemplo.com"/>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label" for="regRol">Rol <span class="req">*</span></label>
+                    <select class="field-input field-select" id="regRol">
+                        <option value="ADMIN">Administrador</option>
+                        <option value="VENDEDOR" selected>Vendedor</option>
+                        <option value="BODEGUERO">Bodeguero</option>
+                    </select>
+                </div>
+
+                <div class="field-group field-full">
+                    <label class="field-label" for="regContrasena">Contraseña <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <svg class="input-icon" viewBox="0 0 20 20" fill="none">
+                            <rect x="4" y="9" width="12" height="9" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                            <path d="M7 9V6.5a3 3 0 016 0V9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                            <circle cx="10" cy="13.5" r="1" fill="currentColor"/>
+                        </svg>
+                        <input class="field-input" type="password" id="regContrasena" placeholder="Mínimo 6 caracteres"/>
+                        <button class="toggle-pass" type="button" onclick="togglePassword('regContrasena', this)"
+                                title="Mostrar/ocultar contraseña">
+                            <svg class="eye-icon" viewBox="0 0 20 20" fill="none">
+                                <path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.5"/>
+                                <circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                    </div>
+                    <!-- Indicador de fortaleza -->
+                    <div class="strength-bar">
+                        <div class="strength-fill" id="strengthFill"></div>
+                    </div>
+                    <span class="strength-label" id="strengthLabel"></span>
+                </div>
+
+            </div>
+
+            <button class="btn-main" id="btnRegistro" onclick="registrarUsuario()">
+                <span class="btn-text">Crear Cuenta</span>
+                <span class="btn-loader" hidden>
+                    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+                </span>
+            </button>
+
+            <p class="switch-hint">
+                ¿Ya tienes cuenta?
+                <button class="link-btn" onclick="mostrarPanel('login')">Inicia sesión</button>
+            </p>
+        </div>
+
+    </div><!-- /card-wrapper -->
+</div><!-- /scene -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script src="/js/login.js"></script>
+</body>
+</html>
