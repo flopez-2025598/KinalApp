@@ -4,9 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>KinalApp — Clientes</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
-
     <link rel="stylesheet" href="/css/Clientes.css"/>
 </head>
 <body>
@@ -21,8 +19,10 @@
             <a href="/ventas-view"       class="nav-link">Ventas</a>
             <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
     </nav>
-
     <div class="header-content">
         <h1 class="page-title">Clientes</h1>
         <p class="page-subtitle">Gestión de clientes registrados en el sistema</p>
@@ -31,7 +31,6 @@
 
 <main class="main-container">
 
-    <!-- FORMULARIO: crear o editar cliente -->
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Cliente</h2>
 
@@ -39,43 +38,23 @@
 
             <div class="field-group">
                 <label class="field-label" for="dpiCliente">DPI Cliente <span class="required">*</span></label>
-                <input
-                        class="field-input"
-                        type="number"
-                        id="dpiCliente"
-                        placeholder="Número de DPI"
-                />
+                <input class="field-input" type="number" id="dpiCliente" placeholder="Número de DPI"/>
                 <span class="field-hint" id="dpiHint"></span>
             </div>
 
             <div class="field-group">
                 <label class="field-label" for="nombreCliente">Nombre <span class="required">*</span></label>
-                <input
-                        class="field-input"
-                        type="text"
-                        id="nombreCliente"
-                        placeholder="Nombre del cliente"
-                />
+                <input class="field-input" type="text" id="nombreCliente" placeholder="Nombre del cliente"/>
             </div>
 
             <div class="field-group">
                 <label class="field-label" for="apellidoCliente">Apellido <span class="required">*</span></label>
-                <input
-                        class="field-input"
-                        type="text"
-                        id="apellidoCliente"
-                        placeholder="Apellido del cliente"
-                />
+                <input class="field-input" type="text" id="apellidoCliente" placeholder="Apellido del cliente"/>
             </div>
 
             <div class="field-group field-group--full">
                 <label class="field-label" for="direccion">Dirección</label>
-                <input
-                        class="field-input"
-                        type="text"
-                        id="direccion"
-                        placeholder="Dirección del cliente"
-                />
+                <input class="field-input" type="text" id="direccion" placeholder="Dirección del cliente"/>
             </div>
 
             <div class="field-group">
@@ -89,32 +68,20 @@
         </div>
 
         <div class="form-actions">
-            <button class="btn btn--primary" onclick="guardarCliente()">
-                Guardar
-            </button>
-            <button class="btn btn--ghost" onclick="limpiarFormulario()">
-                Limpiar
-            </button>
+            <button class="btn btn--primary" onclick="guardarCliente()">Guardar</button>
+            <button class="btn btn--ghost"   onclick="limpiarFormulario()">Limpiar</button>
         </div>
     </section>
 
-    <!-- TABLA: listado de clientes -->
     <section class="table-section">
         <div class="table-header">
             <h2 class="section-title">Listado de Clientes</h2>
-            <button class="btn btn--secondary" onclick="cargarClientes()">
-                Recargar
-            </button>
+            <button class="btn btn--secondary" onclick="cargarClientes()">Recargar</button>
         </div>
 
         <div class="search-bar">
-            <input
-                    class="field-input search-input"
-                    type="number"
-                    id="inputBusqueda"
-                    placeholder="  Buscar por DPI..."
-                    oninput="buscarEnTabla()"
-            />
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="  Buscar por DPI..." oninput="buscarEnTabla()"/>
         </div>
 
         <div class="table-wrapper">
@@ -140,19 +107,17 @@
 
 </main>
 
-<!-- MODAL: advertencia llave primaria -->
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
         <h3 class="modal-title">Acción No Permitida</h3>
         <p class="modal-message">
             El <strong>DPI</strong> es la llave primaria del cliente.<br/>
-            <span class="modal-detail">No se puede modificar porque otras tablas (Ventas) dependen de este valor como llave foránea. Modificarlo rompería la integridad referencial de la base de datos.</span>
+            <span class="modal-detail">No se puede modificar porque otras tablas (Ventas) dependen de este valor como llave foránea.</span>
         </p>
         <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
     </div>
 </div>
 
-<!-- MODAL: confirmar eliminación -->
 <div class="modal-overlay" id="modalEliminar">
     <div class="modal-box modal-box--danger">
         <h3 class="modal-title">Confirmar Eliminación</h3>
@@ -161,13 +126,12 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
-            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
         </div>
     </div>
 </div>
 
 <div class="toast" id="toast"></div>
-
 <script src="/js/clientes.js"></script>
 </body>
 </html>

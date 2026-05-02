@@ -19,6 +19,9 @@
             <a href="/ventas-view"       class="nav-link">Ventas</a>
             <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
     </nav>
     <div class="header-content">
         <h1 class="page-title">Productos</h1>
@@ -66,7 +69,7 @@
 
         <div class="form-actions">
             <button class="btn btn--primary" onclick="guardarProducto()">
-                <span class="btn-icon"></span> Guardar
+                <span class="btn-icon">💾</span> Guardar
             </button>
             <button class="btn btn--ghost" onclick="limpiarFormulario()">
                 <span class="btn-icon">✕</span> Limpiar
@@ -83,13 +86,8 @@
         </div>
 
         <div class="search-bar">
-            <input
-                    class="field-input search-input"
-                    type="number"
-                    id="inputBusqueda"
-                    placeholder="  Buscar por Código de Producto..."
-                    oninput="buscarEnTabla()"
-            />
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="  Buscar por Código de Producto..." oninput="buscarEnTabla()"/>
         </div>
 
         <div class="table-wrapper">
@@ -118,7 +116,7 @@
 
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
-        <div class="modal-icon"></div>
+        <div class="modal-icon">⚠️</div>
         <h3 class="modal-title">Acción No Permitida</h3>
         <p class="modal-message">
             El <strong>Código Producto</strong> es la llave primaria.<br/>
@@ -137,7 +135,7 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
-            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
         </div>
     </div>
 </div>

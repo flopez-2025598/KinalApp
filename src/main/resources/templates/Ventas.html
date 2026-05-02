@@ -19,6 +19,9 @@
             <a href="/ventas-view"       class="nav-link active">Ventas</a>
             <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
     </nav>
     <div class="header-content">
         <h1 class="page-title">Ventas</h1>
@@ -87,15 +90,9 @@
             <button class="btn btn--secondary" onclick="cargarVentas()">↻ Recargar</button>
         </div>
 
-        <!-- ✅ BARRA DE BÚSQUEDA POR CÓDIGO DE VENTA -->
         <div class="search-bar">
-            <input
-                    class="field-input search-input"
-                    type="number"
-                    id="inputBusqueda"
-                    placeholder="🔍  Buscar por Código de Venta..."
-                    oninput="buscarEnTabla()"
-            />
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="🔍  Buscar por Código de Venta..." oninput="buscarEnTabla()"/>
         </div>
 
         <div class="table-wrapper">
@@ -149,7 +146,7 @@
         </p>
         <div class="modal-actions">
             <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
-            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
         </div>
     </div>
 </div>

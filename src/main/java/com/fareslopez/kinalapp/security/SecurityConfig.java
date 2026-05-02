@@ -8,6 +8,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,21 +18,26 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final UserDetailsServiceImpl userDetailsService;
+    private final ManejadorDeAutenticacion manejadorDeAutenticacion;
 
-    public SecurityConfig(UserDetailsServiceImpl userDetailsService) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService,
+                          ManejadorDeAutenticacion manejadorDeAutenticacion) {
         this.userDetailsService = userDetailsService;
+        this.manejadorDeAutenticacion = manejadorDeAutenticacion;
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider((UserDetailsService) userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
+
     @Bean
     public AuthenticationManager authenticationManager(
             AuthenticationConfiguration config) throws Exception {
@@ -48,8 +54,7 @@ public class SecurityConfig {
                                 "/login-view", "/login", "/acceso-denegado",
                                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**"
                         ).permitAll()
-                        // Permitir registro sin autenticación para crear el primer usuario
-                        .requestMatchers(HttpMethod.POST, "/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios").hasRole("ADMIN")
                         .requestMatchers("/usuarios-view", "/usuarios/**").hasRole("ADMIN")
                         .requestMatchers("/productos-view", "/productos/**").hasAnyRole("ADMIN", "BODEGUERO")
                         .requestMatchers("/clientes-view", "/clientes/**").hasAnyRole("ADMIN", "VENDEDOR")
@@ -62,7 +67,7 @@ public class SecurityConfig {
                         .loginProcessingUrl("/login")
                         .usernameParameter("username")
                         .passwordParameter("password")
-                        .defaultSuccessUrl("/clientes-view", true)
+                        .successHandler(manejadorDeAutenticacion)
                         .failureUrl("/login-view?error=true")
                         .permitAll()
                 )
@@ -78,6 +83,7 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf
                         .ignoringRequestMatchers(
+                                "/logout",
                                 "/clientes/**", "/productos/**",
                                 "/usuarios/**", "/ventas/**", "/detalleventas/**"
                         )

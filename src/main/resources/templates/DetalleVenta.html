@@ -19,6 +19,9 @@
             <a href="/ventas-view"       class="nav-link">Ventas</a>
             <a href="/detalleventa-view" class="nav-link active">Detalle Ventas</a>
         </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
     </nav>
     <div class="header-content">
         <h1 class="page-title">Detalle Ventas</h1>
@@ -80,13 +83,8 @@
         </div>
 
         <div class="search-bar">
-            <input
-                    class="field-input search-input"
-                    type="number"
-                    id="inputBusqueda"
-                    placeholder="  Buscar por Código de Detalle..."
-                    oninput="buscarEnTabla()"
-            />
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="  Buscar por Código de Detalle..." oninput="buscarEnTabla()"/>
         </div>
 
         <div class="table-wrapper">
