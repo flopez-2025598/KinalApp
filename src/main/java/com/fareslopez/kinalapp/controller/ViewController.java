@@ -18,6 +18,12 @@ public class ViewController {
         return "login";
     }
 
+    /* ---- ACCESO DENEGADO (403) ---- */
+    @GetMapping("/acceso-denegado")
+    public String accesoDenegado() {
+        return "acceso-denegado";
+    }
+
     /* ---- MÓDULOS ---- */
     @GetMapping("/clientes-view")
     public String clientes() {
