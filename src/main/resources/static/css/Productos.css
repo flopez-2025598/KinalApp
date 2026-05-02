@@ -234,3 +234,27 @@ tr:hover td { background-color: #f4faf4; }
 .toast--visible { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast--success { background: #2e7d32; }
 .toast--error   { background: #e53935; }
+.top-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.btn-logout {
+    background-color: transparent;
+    border: 1.5px solid #ef9a9a;
+    color: #ef9a9a;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.btn-logout:hover {
+    background-color: #ef9a9a;
+    color: #1b5e20;
+}

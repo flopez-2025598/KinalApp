@@ -13,12 +13,15 @@
     <nav class="top-nav">
         <span class="brand">KinalApp</span>
         <div class="nav-links">
-            <a href="clientes-view"      class="nav-link">Clientes</a>
-            <a href="productos-view"     class="nav-link">Productos</a>
-            <a href="usuarios-view"      class="nav-link active">Usuarios</a>
-            <a href="ventas-view"        class="nav-link">Ventas</a>
-            <a href="detalleventas-view" class="nav-link">Detalle Ventas</a>
+            <a href="/clientes-view"     class="nav-link">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link active">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
         </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
     </nav>
     <div class="header-content">
         <h1 class="page-title">Usuarios</h1>
@@ -28,41 +31,32 @@
 
 <main class="main-container">
 
-    <!-- FORMULARIO: crear o editar usuario
-         NOTA: codigo_usuario es llave primaria Y llave foránea en Ventas
-         (columna Usuarios_codigo_usuario). Por eso se bloquea en edición. -->
     <section class="form-section">
         <h2 class="section-title">Registrar / Editar Usuario</h2>
 
         <div class="form-grid">
 
-            <!-- Código Usuario: LLAVE PRIMARIA. Bloqueado en modo edición -->
             <div class="field-group">
                 <label class="field-label" for="codigoUsuario">Código Usuario <span class="required">*</span></label>
                 <input class="field-input" type="number" id="codigoUsuario" placeholder="Código único"/>
                 <span class="field-hint" id="codigoHint"></span>
             </div>
 
-            <!-- Username: mapea al campo "username" en BD -->
             <div class="field-group">
                 <label class="field-label" for="usuario">Username <span class="required">*</span></label>
                 <input class="field-input" type="text" id="usuario" placeholder="Nombre de usuario"/>
             </div>
 
-            <!-- Contraseña: en producción esto debería hashearse en el backend -->
             <div class="field-group">
                 <label class="field-label" for="contrasena">Contraseña <span class="required">*</span></label>
-                <!-- type="password" oculta los caracteres al escribir -->
                 <input class="field-input" type="password" id="contrasena" placeholder="Contraseña"/>
             </div>
 
-            <!-- Email -->
             <div class="field-group">
                 <label class="field-label" for="correo">Email <span class="required">*</span></label>
                 <input class="field-input" type="email" id="correo" placeholder="correo@ejemplo.com"/>
             </div>
 
-            <!-- Rol: define los permisos del usuario en el sistema -->
             <div class="field-group">
                 <label class="field-label" for="rol">Rol <span class="required">*</span></label>
                 <select class="field-input field-select" id="rol">
@@ -72,7 +66,6 @@
                 </select>
             </div>
 
-            <!-- Estado -->
             <div class="field-group">
                 <label class="field-label" for="estado">Estado <span class="required">*</span></label>
                 <select class="field-input field-select" id="estado">
@@ -93,7 +86,6 @@
         </div>
     </section>
 
-    <!-- TABLA de usuarios -->
     <section class="table-section">
         <div class="table-header">
             <h2 class="section-title">Listado de Usuarios</h2>
@@ -126,7 +118,6 @@
 
 </main>
 
-<!-- MODAL: advertencia llave primaria -->
 <div class="modal-overlay" id="modalLlavePrimaria">
     <div class="modal-box modal-box--warning">
         <div class="modal-icon">⚠️</div>
@@ -139,7 +130,6 @@
     </div>
 </div>
 
-<!-- MODAL: confirmar eliminación -->
 <div class="modal-overlay" id="modalEliminar">
     <div class="modal-box modal-box--danger">
         <div class="modal-icon">🗑️</div>
@@ -155,6 +145,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<script src="js/usuarios.js"></script>
+<script src="/js/Usuarios.js"></script>
 </body>
 </html>
