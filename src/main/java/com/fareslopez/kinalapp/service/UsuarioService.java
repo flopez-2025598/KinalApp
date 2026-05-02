@@ -15,33 +15,33 @@ public class UsuarioService implements IUsuarioService {
     private UsuarioRepository usuarioRepository;
 
     @Override
-    public List<Usuario> listarTodos(){
+    public List<Usuario> listarTodos() {
         return usuarioRepository.findAll();
     }
 
     @Override
-    public Usuario guardar(Usuario usuario){
+    public Usuario guardar(Usuario usuario) {
         return usuarioRepository.save(usuario);
     }
 
     @Override
-    public Optional<Usuario> buscarPorId(int id){
+    public Optional<Usuario> buscarPorId(int id) {
         return usuarioRepository.findById(id);
     }
 
     @Override
-    public Usuario actualizar(int id, Usuario usuario){
+    public Usuario actualizar(int id, Usuario usuario) {
         usuario.setCodigoUsuario(id);
         return usuarioRepository.save(usuario);
     }
 
     @Override
-    public void eliminar(int id){
+    public void eliminar(int id) {
         usuarioRepository.deleteById(id);
     }
 
     @Override
-    public boolean existePorId(int id){
+    public boolean existePorId(int id) {
         return usuarioRepository.existsById(id);
     }
 }
