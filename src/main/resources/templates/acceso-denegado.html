@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Acceso Denegado</title>
+    <link rel="stylesheet" href="/css/Clientes.css"/>
+</head>
+<body>
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
+    </nav>
+</header>
+<main class="main-container" style="text-align:center; padding: 60px 20px;">
+    <h1 style="font-size: 4rem; color: #e53935;">403</h1>
+    <h2>Acceso Denegado</h2>
+    <p>No tienes permiso para acceder a esta página.</p>
+    <a href="javascript:history.back()" class="btn btn--primary">← Regresar</a>
+</main>
+</body>
+</html>

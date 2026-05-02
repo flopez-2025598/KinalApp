@@ -1,0 +1,78 @@
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: #0B0E14;
+    color: #F0F6FC;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+}
+
+.box {
+    background: #161B22;
+    border: 1px solid #FF3D00;
+    border-radius: 16px;
+    padding: 3rem 2.5rem;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 0 40px rgba(255, 61, 0, 0.15);
+}
+
+.code {
+    font-size: 5rem;
+    font-weight: 800;
+    color: #FF3D00;
+    font-family: 'Syne', sans-serif;
+}
+
+.title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 1rem 0 0.5rem;
+    color: #F0F6FC;
+}
+
+.msg {
+    font-size: 0.85rem;
+    color: #8B949E;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 28px;
+    background: #00D1FF;
+    color: #0B0E14;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    transition: background 0.2s;
+}
+
+.btn:hover {
+    background: #F0F6FC;
+}
+
+.rol {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 0.75rem;
+    color: #484F58;
+}
+
+.rol span {
+    color: #00D1FF;
+    font-weight: 600;
+}
