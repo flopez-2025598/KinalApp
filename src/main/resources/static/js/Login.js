@@ -1,21 +1,21 @@
-onst API_USUARIOS = '/usuarios';
+const API_USUARIOS = '/usuarios';
 
-/* ---- TABS ---- */
-function mostrarPanel(cual) {
+/* ── Cambiar entre paneles Login / Registro ── */
+function mostrarPanel(panel) {
     const panelLogin    = document.getElementById('panelLogin');
     const panelRegistro = document.getElementById('panelRegistro');
     const tabLogin      = document.getElementById('tabLogin');
     const tabRegistro   = document.getElementById('tabRegistro');
     const indicator     = document.getElementById('tabIndicator');
 
-    if (cual === 'login') {
+    if (panel === 'login') {
         panelLogin.hidden    = false;
         panelRegistro.hidden = true;
         tabLogin.classList.add('active');
         tabRegistro.classList.remove('active');
         tabLogin.setAttribute('aria-selected', 'true');
         tabRegistro.setAttribute('aria-selected', 'false');
-        indicator.classList.remove('moved');
+        if (indicator) indicator.style.transform = 'translateX(0)';
     } else {
         panelLogin.hidden    = true;
         panelRegistro.hidden = false;
@@ -23,147 +23,158 @@ function mostrarPanel(cual) {
         tabRegistro.classList.add('active');
         tabLogin.setAttribute('aria-selected', 'false');
         tabRegistro.setAttribute('aria-selected', 'true');
-        indicator.classList.add('moved');
+        if (indicator) indicator.style.transform = 'translateX(100%)';
     }
 }
 
-/* ---- MOSTRAR / OCULTAR CONTRASEÑA ---- */
+/* ── Mostrar / ocultar contraseña ── */
 function togglePassword(inputId, btn) {
     const input = document.getElementById(inputId);
-    const isPass = input.type === 'password';
-    input.type = isPass ? 'text' : 'password';
-    btn.title  = isPass ? 'Ocultar contraseña' : 'Mostrar contraseña';
-    /* Cambia el ojo con una línea cruzada visualmente */
-    btn.style.opacity = isPass ? '0.7' : '1';
+    if (!input) return;
+    const mostrar = input.type === 'password';
+    input.type = mostrar ? 'text' : 'password';
+    btn.title = mostrar ? 'Ocultar contraseña' : 'Mostrar contraseña';
 }
 
-/* ---- FORTALEZA DE CONTRASEÑA ---- */
+/* ── Indicador de fortaleza de contraseña ── */
 document.addEventListener('DOMContentLoaded', () => {
-    const passInput = document.getElementById('regContrasena');
-    if (passInput) {
-        passInput.addEventListener('input', evaluarFortaleza);
+    const regPass = document.getElementById('regContrasena');
+    if (regPass) {
+        regPass.addEventListener('input', () => {
+            const val   = regPass.value;
+            const fill  = document.getElementById('strengthFill');
+            const label = document.getElementById('strengthLabel');
+            if (!fill || !label) return;
+
+            let score = 0;
+            if (val.length >= 6)               score++;
+            if (val.length >= 10)              score++;
+            if (/[A-Z]/.test(val))             score++;
+            if (/[0-9]/.test(val))             score++;
+            if (/[^A-Za-z0-9]/.test(val))      score++;
+
+            const niveles = [
+                { pct: '0%',   color: 'transparent', texto: '' },
+                { pct: '25%',  color: '#ef4444',      texto: 'Muy débil' },
+                { pct: '50%',  color: '#f97316',      texto: 'Débil' },
+                { pct: '75%',  color: '#eab308',      texto: 'Moderada' },
+                { pct: '90%',  color: '#22c55e',      texto: 'Fuerte' },
+                { pct: '100%', color: '#16a34a',      texto: 'Muy fuerte' },
+            ];
+            const n = niveles[Math.min(score, 5)];
+            fill.style.width           = n.pct;
+            fill.style.backgroundColor = n.color;
+            label.textContent          = n.texto;
+        });
     }
+
+    // Cargar el panel login por defecto
+    mostrarPanel('login');
 });
 
-function evaluarFortaleza() {
-    const pass   = document.getElementById('regContrasena').value;
-    const fill   = document.getElementById('strengthFill');
-    const label  = document.getElementById('strengthLabel');
-
-    let score = 0;
-    if (pass.length >= 6)                    score++;
-    if (pass.length >= 10)                   score++;
-    if (/[A-Z]/.test(pass))                  score++;
-    if (/[0-9]/.test(pass))                  score++;
-    if (/[^A-Za-z0-9]/.test(pass))          score++;
-
-    const pct    = (score / 5) * 100;
-    const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#16a34a'];
-    const texts  = ['Muy débil', 'Débil', 'Regular', 'Fuerte', 'Muy fuerte'];
-
-    fill.style.width           = pct + '%';
-    fill.style.backgroundColor = colors[score - 1] || '#ef4444';
-    label.textContent          = pass.length > 0 ? texts[score - 1] || 'Muy débil' : '';
+/* ── Toast ── */
+function mostrarToast(msg, tipo = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    toast.textContent = msg;
+    toast.className   = `toast toast--${tipo} toast--visible`;
+    setTimeout(() => toast.classList.remove('toast--visible'), 3500);
 }
 
+/* ══════════════════════════════════════════════
+   INICIAR SESIÓN
+   Busca el usuario en /usuarios y valida credenciales
+   ══════════════════════════════════════════════ */
 async function iniciarSesion() {
-    const usernameVal = document.getElementById('loginUsuario').value.trim();
-    const passVal     = document.getElementById('loginContrasena').value;
+    const usernameInput = document.getElementById('loginUsuario');
+    const passInput     = document.getElementById('loginContrasena');
+    const btnLogin      = document.getElementById('btnLogin');
 
-    if (!usernameVal || !passVal) {
-        mostrarToast('Completa usuario y contraseña', 'error');
-        marcarError('loginUsuario',   !usernameVal);
-        marcarError('loginContrasena', !passVal);
+    const username = usernameInput?.value.trim();
+    const password = passInput?.value;
+
+    if (!username || !password) {
+        mostrarToast('Por favor ingresa usuario y contraseña.', 'error');
         return;
     }
 
-    setLoading('btnLogin', true);
+    // Mostrar loader
+    setLoading(btnLogin, true);
 
     try {
         const res = await fetch(API_USUARIOS);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) throw new Error('Error al conectar con el servidor.');
 
         const usuarios = await res.json();
 
-        /* Buscar por username (campo "usuario" en el modelo) */
-        const encontrado = usuarios.find(u =>
-            (u.usuario || '').toLowerCase() === usernameVal.toLowerCase()
+        // Buscar coincidencia por username y contraseña
+        const encontrado = usuarios.find(
+            u => u.usuario === username && u.contrasena === password
         );
 
         if (!encontrado) {
-            mostrarToast('Usuario no encontrado', 'error');
-            marcarError('loginUsuario', true);
+            mostrarToast('Usuario o contraseña incorrectos.', 'error');
+            setLoading(btnLogin, false);
             return;
         }
 
         if (encontrado.estado === 0) {
-            mostrarToast('Esta cuenta está inactiva', 'error');
+            mostrarToast('Tu cuenta está inactiva. Contacta al administrador.', 'error');
+            setLoading(btnLogin, false);
             return;
         }
 
-        /* Comparar contraseña */
-        if (encontrado.contrasena !== passVal) {
-            mostrarToast('Contraseña incorrecta', 'error');
-            marcarError('loginContrasena', true);
-            return;
-        }
-
-        /* Guardar sesión en sessionStorage */
-        sessionStorage.setItem('kinal_user', JSON.stringify({
-            codigo:  encontrado.codigoUsuario,
-            usuario: encontrado.usuario,
-            rol:     encontrado.rol
+        // Guardar sesión en sessionStorage
+        sessionStorage.setItem('usuarioLogueado', JSON.stringify({
+            codigo:   encontrado.codigoUsuario,
+            username: encontrado.usuario,
+            rol:      encontrado.rol
         }));
 
-        mostrarToast(`Bienvenido, ${encontrado.usuario} ✓`, 'success');
+        mostrarToast(`¡Bienvenido, ${encontrado.usuario}!`, 'success');
 
-        /* Redirigir al dashboard (clientes-view) */
-        setTimeout(() => {
-            window.location.href = '/clientes-view';
-        }, 900);
+        // Redirigir al módulo principal
+        setTimeout(() => { window.location.href = '/clientes-view'; }, 1200);
 
     } catch (err) {
-        console.error('Error al iniciar sesión:', err);
-        mostrarToast('No se pudo conectar con el servidor', 'error');
-    } finally {
-        setLoading('btnLogin', false);
+        mostrarToast(err.message || 'Error inesperado.', 'error');
+        setLoading(btnLogin, false);
     }
 }
 
-/* ============================================================
-   2. REGISTRAR USUARIO  —  POST /usuarios
-   ============================================================ */
 async function registrarUsuario() {
-    const codigoVal   = document.getElementById('regCodigo').value.trim();
-    const usuarioVal  = document.getElementById('regUsuario').value.trim();
-    const correoVal   = document.getElementById('regCorreo').value.trim();
-    const passVal     = document.getElementById('regContrasena').value;
-    const rolVal      = document.getElementById('regRol').value;
+    const btnReg = document.getElementById('btnRegistro');
 
-    /* Validaciones */
-    let hayError = false;
-    marcarError('regCodigo',    !codigoVal);   if (!codigoVal)  hayError = true;
-    marcarError('regUsuario',   !usuarioVal);  if (!usuarioVal) hayError = true;
-    marcarError('regCorreo',    !correoVal || !correoVal.includes('@'));
-    if (!correoVal || !correoVal.includes('@')) hayError = true;
-    marcarError('regContrasena', passVal.length < 6);
-    if (passVal.length < 6) hayError = true;
+    const codigo    = parseInt(document.getElementById('regCodigo')?.value);
+    const usuario   = document.getElementById('regUsuario')?.value.trim();
+    const correo    = document.getElementById('regCorreo')?.value.trim();
+    const rol       = document.getElementById('regRol')?.value;
+    const contrasena = document.getElementById('regContrasena')?.value;
 
-    if (hayError) {
-        mostrarToast('Revisa los campos marcados', 'error');
-        return;
+    // Validaciones básicas
+    if (!codigo || isNaN(codigo)) {
+        mostrarToast('El código de usuario es requerido.', 'error'); return;
+    }
+    if (!usuario) {
+        mostrarToast('El nombre de usuario es requerido.', 'error'); return;
+    }
+    if (!correo || !correo.includes('@')) {
+        mostrarToast('Ingresa un email válido.', 'error'); return;
+    }
+    if (!contrasena || contrasena.length < 6) {
+        mostrarToast('La contraseña debe tener al menos 6 caracteres.', 'error'); return;
     }
 
-    setLoading('btnRegistro', true);
-
     const nuevoUsuario = {
-        codigoUsuario: parseInt(codigoVal),
-        usuario:       usuarioVal,
-        contrasena:    passVal,
-        correo:        correoVal,
-        rol:           rolVal,
+        codigoUsuario: codigo,
+        usuario:       usuario,
+        contrasena:    contrasena,
+        correo:        correo,
+        rol:           rol,
         estado:        1
     };
+
+    setLoading(btnReg, true);
 
     try {
         const res = await fetch(API_USUARIOS, {
@@ -172,73 +183,39 @@ async function registrarUsuario() {
             body:    JSON.stringify(nuevoUsuario)
         });
 
-        if (res.status === 409) {
-            mostrarToast('El código de usuario ya existe', 'error');
-            marcarError('regCodigo', true);
-            return;
+        if (!res.ok) {
+            const texto = await res.text();
+            throw new Error(texto || `Error ${res.status}`);
         }
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
-        mostrarToast('Cuenta creada. Ahora inicia sesión ✓', 'success');
-
-        /* Limpiar y volver al login */
+        mostrarToast('¡Cuenta creada exitosamente! Ahora inicia sesión.', 'success');
         limpiarRegistro();
-        setTimeout(() => mostrarPanel('login'), 1200);
+        setTimeout(() => mostrarPanel('login'), 1500);
 
     } catch (err) {
-        console.error('Error al registrar usuario:', err);
-        mostrarToast('Error al crear la cuenta. ¿Ya existe el código?', 'error');
+        mostrarToast(err.message || 'No se pudo crear la cuenta.', 'error');
     } finally {
-        setLoading('btnRegistro', false);
+        setLoading(btnReg, false);
     }
 }
 
-
-function marcarError(id, hayError) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    if (hayError) {
-        el.classList.add('error');
-        el.addEventListener('input', () => el.classList.remove('error'), { once: true });
-    } else {
-        el.classList.remove('error');
-    }
+/* ── Helpers ── */
+function setLoading(btn, loading) {
+    if (!btn) return;
+    const text   = btn.querySelector('.btn-text');
+    const loader = btn.querySelector('.btn-loader');
+    btn.disabled = loading;
+    if (text)   text.hidden   = loading;
+    if (loader) loader.hidden = !loading;
 }
 
 function limpiarRegistro() {
     ['regCodigo','regUsuario','regCorreo','regContrasena'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) { el.value = ''; el.classList.remove('error'); }
+        if (el) el.value = '';
     });
-    document.getElementById('regRol').value = 'VENDEDOR';
-    document.getElementById('strengthFill').style.width = '0%';
-    document.getElementById('strengthLabel').textContent = '';
+    const fill  = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+    if (fill)  fill.style.width = '0%';
+    if (label) label.textContent = '';
 }
-
-/* Alterna el estado de carga en un botón */
-function setLoading(btnId, loading) {
-    const btn    = document.getElementById(btnId);
-    const text   = btn.querySelector('.btn-text');
-    const loader = btn.querySelector('.btn-loader');
-    btn.disabled       = loading;
-    text.hidden        = loading;
-    loader.hidden      = !loading;
-}
-
-/* Toast */
-function mostrarToast(mensaje, tipo = 'success') {
-    const toast = document.getElementById('toast');
-    toast.textContent = mensaje;
-    toast.className   = `toast show ${tipo}`;
-    clearTimeout(toast._timer);
-    toast._timer = setTimeout(() => { toast.className = 'toast'; }, 3200);
-}
-
-/* Acceso rápido con Enter */
-document.addEventListener('keydown', e => {
-    if (e.key !== 'Enter') return;
-    const panelLogin    = document.getElementById('panelLogin');
-    const panelRegistro = document.getElementById('panelRegistro');
-    if (!panelLogin.hidden)    iniciarSesion();
-    else if (!panelRegistro.hidden) registrarUsuario();
-});
