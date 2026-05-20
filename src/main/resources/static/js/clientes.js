@@ -2,7 +2,7 @@
    clientes.js — KinalApp
    ========================================== */
 
-// ✅ Ruta relativa — sin puerto hardcodeado, funciona en cualquier entorno
+// Ruta relativa — sin puerto hardcodeado, funciona en cualquier entorno
 const API_URL = '/clientes';
 
 let dpiEnEdicion    = null;
@@ -161,7 +161,7 @@ async function prepararEdicion(dpi) {
         document.getElementById('estado').value          = c.estado;
 
         document.getElementById('dpiCliente').disabled = true;
-        document.getElementById('dpiHint').textContent = '🔒 Llave primaria — no editable (FK en Ventas)';
+        document.getElementById('dpiHint').textContent = 'Llave primaria — no editable (FK en Ventas)';
 
         dpiEnEdicion = dpi;
 
