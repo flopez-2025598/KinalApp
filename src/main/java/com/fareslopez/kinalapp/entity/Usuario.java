@@ -2,6 +2,8 @@ package com.fareslopez.kinalapp.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -10,8 +12,9 @@ import jakarta.persistence.Table;
 public class Usuario {
 
     @Id
-    @Column(name = "codigo_usuario")
-    private int codigoUsuario;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "codigo_usuario", nullable = false)
+    private Integer codigoUsuario;
     @Column(name = "username")
     private String usuario;
     @Column(name = "password")
@@ -21,13 +24,13 @@ public class Usuario {
     @Column(name = "rol")
     private String rol;
     @Column(name = "estado")
-    private int estado;
+    private Integer estado;
 
     public Usuario() {
 
     }
 
-    public Usuario(int codigoUsuario, String usuario, String contrasena, String correo, String rol, int estado) {
+    public Usuario(Integer codigoUsuario, String usuario, String contrasena, String correo, String rol, Integer estado) {
         this.codigoUsuario = codigoUsuario;
         this.usuario = usuario;
         this.contrasena = contrasena;
@@ -36,8 +39,8 @@ public class Usuario {
         this.estado = estado;
     }
 
-    public int getCodigoUsuario() { return codigoUsuario; }
-    public void setCodigoUsuario(int codigoUsuario) { this.codigoUsuario = codigoUsuario; }
+    public Integer getCodigoUsuario() { return codigoUsuario; }
+    public void setCodigoUsuario(Integer codigoUsuario) { this.codigoUsuario = codigoUsuario; }
 
     public String getUsuario() { return usuario; }
     public void setUsuario(String usuario) { this.usuario = usuario; }
@@ -51,6 +54,6 @@ public class Usuario {
     public String getRol() { return rol; }
     public void setRol(String rol) { this.rol = rol; }
 
-    public int getEstado() { return estado; }
-    public void setEstado(int estado) { this.estado = estado; }
+    public Integer getEstado() { return estado; }
+    public void setEstado(Integer estado) { this.estado = estado; }
 }

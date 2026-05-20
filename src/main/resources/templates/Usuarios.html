@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Usuarios</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/Usuarios.css"/>
+</head>
+<body>
+
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <div class="nav-links">
+            <a href="/clientes-view"     class="nav-link">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link active">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
+        </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
+    </nav>
+    <div class="header-content">
+        <h1 class="page-title">Usuarios</h1>
+        <p class="page-subtitle">Gestión de cuentas de usuario del sistema</p>
+    </div>
+</header>
+
+<main class="main-container">
+
+    <section class="form-section">
+        <h2 class="section-title">Registrar / Editar Usuario</h2>
+
+        <div class="form-grid">
+
+            <div class="field-group">
+                <label class="field-label" for="codigoUsuario">Código Usuario <span class="required">*</span></label>
+                <input class="field-input" type="number" id="codigoUsuario" placeholder="Código único"/>
+                <span class="field-hint" id="codigoHint"></span>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="usuario">Username <span class="required">*</span></label>
+                <input class="field-input" type="text" id="usuario" placeholder="Nombre de usuario"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="contrasena">Contraseña <span class="required">*</span></label>
+                <input class="field-input" type="password" id="contrasena" placeholder="Contraseña"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="correo">Email <span class="required">*</span></label>
+                <input class="field-input" type="email" id="correo" placeholder="correo@ejemplo.com"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="rol">Rol <span class="required">*</span></label>
+                <select class="field-input field-select" id="rol">
+                    <option value="ADMIN">Administrador</option>
+                    <option value="VENDEDOR">Vendedor</option>
+                    <option value="BODEGUERO">Bodeguero</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="estado">Estado <span class="required">*</span></label>
+                <select class="field-input field-select" id="estado">
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn--primary" onclick="guardarUsuario()">
+                <span class="btn-icon">💾</span> Guardar
+            </button>
+            <button class="btn btn--ghost" onclick="limpiarFormulario()">
+                <span class="btn-icon">✕</span> Limpiar
+            </button>
+        </div>
+    </section>
+
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="section-title">Listado de Usuarios</h2>
+            <button class="btn btn--secondary" onclick="cargarUsuarios()">
+                <span class="btn-icon">↻</span> Recargar
+            </button>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Rol</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tablaUsuarios"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <span class="empty-icon">👥</span>
+            <p>No hay usuarios registrados</p>
+        </div>
+    </section>
+
+</main>
+
+<div class="modal-overlay" id="modalLlavePrimaria">
+    <div class="modal-box modal-box--warning">
+        <div class="modal-icon"></div>
+        <h3 class="modal-title">Acción No Permitida</h3>
+        <p class="modal-message">
+            El <strong>Código Usuario</strong> es la llave primaria.<br/>
+            <span class="modal-detail">La tabla Ventas usa este código como llave foránea (Usuarios_codigo_usuario). Modificarlo rompería las relaciones existentes en la base de datos.</span>
+        </p>
+        <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box modal-box--danger">
+        <div class="modal-icon">🗑️</div>
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">¿Eliminar este usuario?<br/>
+            <span class="modal-detail">Si tiene ventas registradas, la eliminación puede fallar por integridad referencial.</span>
+        </p>
+        <div class="modal-actions">
+            <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+            <button class="btn btn--ghost" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/js/Usuarios.js"></script>
+</body>
+</html>

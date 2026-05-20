@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Detalle Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/DetalleVentas.css"/>
+</head>
+<body>
+
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <div class="nav-links">
+            <a href="/clientes-view"     class="nav-link">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link active">Detalle Ventas</a>
+        </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
+    </nav>
+    <div class="header-content">
+        <h1 class="page-title">Detalle Ventas</h1>
+        <p class="page-subtitle">Gestión de productos por venta</p>
+    </div>
+</header>
+
+<main class="main-container">
+
+    <section class="form-section">
+        <h2 class="section-title">Registrar / Editar Detalle</h2>
+        <div class="form-grid">
+
+            <div class="field-group">
+                <label class="field-label" for="codigoDetalleVenta">Código Detalle <span class="required">*</span></label>
+                <input class="field-input" type="number" id="codigoDetalleVenta" placeholder="ID Detalle"/>
+                <span class="field-hint" id="codigoDetalleHint"></span>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="cantidad">Cantidad <span class="required">*</span></label>
+                <input class="field-input" type="number" id="cantidad" placeholder="0" min="1" oninput="calcularSubtotal()"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="precioUnitario">Precio Unitario <span class="required">*</span></label>
+                <input class="field-input" type="number" id="precioUnitario" placeholder="0.00" step="0.01" oninput="calcularSubtotal()"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="subtotal">Subtotal (Auto)</label>
+                <input class="field-input field-input--calculated" type="number" id="subtotal" placeholder="0.00" step="0.01" readonly/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="productoCodigoProducto">Código Producto <span class="required">*</span></label>
+                <input class="field-input" type="number" id="productoCodigoProducto" placeholder="ID Producto"/>
+                <span class="field-hint" id="productoHint"></span>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="ventasCodigoVenta">Código Venta <span class="required">*</span></label>
+                <input class="field-input" type="number" id="ventasCodigoVenta" placeholder="ID Venta"/>
+                <span class="field-hint" id="ventaHint"></span>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn--primary" onclick="guardarDetalleVenta()">💾 Guardar</button>
+            <button class="btn btn--ghost"   onclick="limpiarFormulario()">✕ Limpiar</button>
+        </div>
+    </section>
+
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="section-title">Listado de Detalles</h2>
+            <button class="btn btn--secondary" onclick="cargarDetalles()">↻ Recargar</button>
+            <div style="margin-left:16px; display:inline-block; vertical-align:middle;">
+                <strong>Detalles cargados:</strong> <span id="debugCount">—</span>
+            </div>
+        </div>
+
+        <div class="search-bar">
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="  Buscar por Código de Detalle..." oninput="buscarEnTabla()"/>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Cant.</th>
+                    <th>Precio U.</th>
+                    <th>Subtotal</th>
+                    <th>Producto</th>
+                    <th>Venta</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tablaDetalles"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <p>No hay detalles registrados</p>
+        </div>
+
+        <div style="margin-top:12px;">
+            <details>
+                <summary>Mostrar respuesta cruda (diagnóstico)</summary>
+                <pre id="debugJson" style="max-height:300px; overflow:auto; white-space:pre-wrap; background:#fafafa; padding:12px; border-radius:6px;">(vacio)</pre>
+            </details>
+        </div>
+    </section>
+
+</main>
+
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box modal-box--danger">
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">¿Deseas eliminar este detalle de venta?</p>
+        <div class="modal-actions">
+            <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script>
+    (function(){
+        function loadAndStart(){
+            console.debug('[DetalleVenta.html] cargando /js/DetalleVentas.js');
+            var s = document.createElement('script');
+            s.src = '/js/DetalleVentas.js';
+            s.onload = function(){
+                console.debug('[DetalleVenta.html] /js/DetalleVentas.js cargado');
+                try{ if(window.cargarDetalles) window.cargarDetalles(); }catch(e){console.error(e);} 
+            };
+            s.onerror = function(){ console.error('No se pudo cargar /js/DetalleVentas.js'); };
+            document.body.appendChild(s);
+        }
+        if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', loadAndStart);
+        else loadAndStart();
+    })();
+</script>
+</body>
+</html>

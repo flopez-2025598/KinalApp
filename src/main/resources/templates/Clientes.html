@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>KinalApp — Clientes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="/css/Clientes.css"/>
+</head>
+<body>
+
+<header class="page-header">
+    <nav class="top-nav">
+        <span class="brand">KinalApp</span>
+        <div class="nav-links">
+            <a href="/clientes-view"     class="nav-link active">Clientes</a>
+            <a href="/productos-view"    class="nav-link">Productos</a>
+            <a href="/usuarios-view"     class="nav-link">Usuarios</a>
+            <a href="/ventas-view"       class="nav-link">Ventas</a>
+            <a href="/detalleventa-view" class="nav-link">Detalle Ventas</a>
+        </div>
+        <form action="/logout" method="post">
+            <button type="submit" class="btn-logout">Cerrar sesión</button>
+        </form>
+    </nav>
+    <div class="header-content">
+        <h1 class="page-title">Clientes</h1>
+        <p class="page-subtitle">Gestión de clientes registrados en el sistema</p>
+    </div>
+</header>
+
+<main class="main-container">
+
+    <section class="form-section">
+        <h2 class="section-title">Registrar / Editar Cliente</h2>
+
+        <div class="form-grid">
+
+            <div class="field-group">
+                <label class="field-label" for="dpiCliente">DPI Cliente <span class="required">*</span></label>
+                <input class="field-input" type="number" id="dpiCliente" placeholder="Número de DPI"/>
+                <span class="field-hint" id="dpiHint"></span>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="nombreCliente">Nombre <span class="required">*</span></label>
+                <input class="field-input" type="text" id="nombreCliente" placeholder="Nombre del cliente"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="apellidoCliente">Apellido <span class="required">*</span></label>
+                <input class="field-input" type="text" id="apellidoCliente" placeholder="Apellido del cliente"/>
+            </div>
+
+            <div class="field-group field-group--full">
+                <label class="field-label" for="direccion">Dirección</label>
+                <input class="field-input" type="text" id="direccion" placeholder="Dirección del cliente"/>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="estado">Estado <span class="required">*</span></label>
+                <select class="field-input field-select" id="estado">
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+            <button class="btn btn--primary" onclick="guardarCliente()">Guardar</button>
+            <button class="btn btn--ghost"   onclick="limpiarFormulario()">Limpiar</button>
+        </div>
+    </section>
+
+    <section class="table-section">
+        <div class="table-header">
+            <h2 class="section-title">Listado de Clientes</h2>
+            <button class="btn btn--secondary" onclick="cargarClientes()">Recargar</button>
+        </div>
+
+        <div class="search-bar">
+            <input class="field-input search-input" type="number" id="inputBusqueda"
+                   placeholder="  Buscar por DPI..." oninput="buscarEnTabla()"/>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>DPI</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Dirección</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+                </thead>
+                <tbody id="tablaClientes"></tbody>
+            </table>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+            <p>No hay clientes registrados</p>
+        </div>
+    </section>
+
+</main>
+
+<div class="modal-overlay" id="modalLlavePrimaria">
+    <div class="modal-box modal-box--warning">
+        <h3 class="modal-title">Acción No Permitida</h3>
+        <p class="modal-message">
+            El <strong>DPI</strong> es la llave primaria del cliente.<br/>
+            <span class="modal-detail">No se puede modificar porque otras tablas (Ventas) dependen de este valor como llave foránea.</span>
+        </p>
+        <button class="btn btn--primary" onclick="cerrarModal('modalLlavePrimaria')">Entendido</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal-box modal-box--danger">
+        <h3 class="modal-title">Confirmar Eliminación</h3>
+        <p class="modal-message">¿Estás seguro que deseas eliminar este cliente?<br/>
+            <span class="modal-detail">Esta acción no se puede deshacer.</span>
+        </p>
+        <div class="modal-actions">
+            <button class="btn btn--danger" id="btnConfirmarEliminar">Sí, eliminar</button>
+            <button class="btn btn--ghost"  onclick="cerrarModal('modalEliminar')">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/js/clientes.js"></script>
+</body>
+</html>
