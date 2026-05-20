@@ -155,7 +155,7 @@ function editarProducto(codigo, nombre, precio, stock, estado) {
     document.getElementById('estado').value         = estado;
 
     document.getElementById('codigoProducto').disabled = true;
-    document.getElementById('codigoHint').textContent  = '🔒 Llave primaria — no editable (FK en DetalleVenta)';
+    document.getElementById('codigoHint').textContent  = 'Llave primaria — no editable (FK en DetalleVenta)';
 
     idOriginal  = codigo;
     modoEdicion = true;
