@@ -1,8 +1,7 @@
 /*
    DetalleVentas.js — KinalApp Frontend
-
    Campos editables en modo actualización: cantidad, precioUnitario, subtotal.
-    */
+*/
 
 const API_URL = '/detalleventas';
 
@@ -11,17 +10,38 @@ let codigoParaEliminar   = null;
 let _fkProductoGuardado  = null;
 let _fkVentaGuardada     = null;
 
-document.addEventListener('DOMContentLoaded', cargarDetalles);
+// Lista completa en memoria (para filtrar sin re-fetch)
+let _todosLosDetalles = [];
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', cargarDetalles);
+} else {
+    // Si el script se carga tras DOMContentLoaded, llamar directamente
+    cargarDetalles();
+}
 
 /*
    1. CARGAR TABLA — GET /detalleventas
-  */
+*/
 async function cargarDetalles() {
     try {
         const response = await fetch(API_URL);
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const detalles = await response.json();
-        renderizarTabla(detalles);
+        _todosLosDetalles = await response.json();
+        console.debug('[DetalleVentas] cargados:', _todosLosDetalles.length);
+        // Mostrar contador en la página para diagnóstico
+        try {
+            const el = document.getElementById('debugCount');
+            if (el) el.textContent = _todosLosDetalles.length;
+        } catch(e) { console.warn(e); }
+
+        // Escribir JSON crudo para inspección
+        try {
+            const dbg = document.getElementById('debugJson');
+            if (dbg) dbg.textContent = JSON.stringify(_todosLosDetalles.slice(0,500), null, 2);
+        } catch(e) { console.warn(e); }
+
+        renderizarTabla(_todosLosDetalles);
     } catch (error) {
         console.error('Error al cargar detalles:', error);
         mostrarToast('Error al conectar con el servidor', 'error');
@@ -32,7 +52,7 @@ function renderizarTabla(detalles) {
     const tbody      = document.getElementById('tablaDetalles');
     const emptyState = document.getElementById('emptyState');
 
-    if (detalles.length === 0) {
+    if (!detalles || detalles.length === 0) {
         tbody.innerHTML = '';
         emptyState.style.display = 'block';
         return;
@@ -45,17 +65,13 @@ function renderizarTabla(detalles) {
             <td>${d.cantidad}</td>
             <td class="price-cell">Q ${parseFloat(d.precioUnitario).toFixed(2)}</td>
             <td class="subtotal-cell">Q ${parseFloat(d.subtotal).toFixed(2)}</td>
-            <td class="fk-cell">🔗 ${d.productoCodigoProducto}</td>
-            <td class="fk-cell">🔗 ${d.ventasCodigoVenta}</td>
+            <td class="fk-cell">${d.productoCodigoProducto}</td>
+            <td class="fk-cell">${d.ventasCodigoVenta}</td>
             <td>
                 <div class="row-actions">
                     <button class="btn btn--secondary btn--sm"
-                        onclick="buscarPorId(${d.codigoDetalleVenta})">
-                        🔍 Buscar
-                    </button>
-                    <button class="btn btn--secondary btn--sm"
                         onclick="cargarEnFormulario(${d.codigoDetalleVenta})">
-                        ✎
+                        ✎ Editar
                     </button>
                     <button class="btn btn--danger btn--sm"
                         onclick="confirmarEliminar(${d.codigoDetalleVenta})">
@@ -68,55 +84,42 @@ function renderizarTabla(detalles) {
 }
 
 /*
-   2. BUSCAR POR ID — GET /detalleventas/{id}
-   Muestra los datos en el formulario (solo lectura)
- */
-async function buscarPorId(id) {
-    try {
-        const res = await fetch(`${API_URL}/${id}`);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+   BARRA DE BÚSQUEDA — filtra por código de detalle
+   Llamada desde oninput="buscarEnTabla()" en el HTML.
+   Esta función faltaba y causaba error en consola.
+*/
+function buscarEnTabla() {
+    const query = document.getElementById('inputBusqueda').value.trim();
 
-        const d = await res.json();
+    if (query === '') {
+        renderizarTabla(_todosLosDetalles);
+        return;
+    }
 
-        document.getElementById('codigoDetalleVenta').value       = d.codigoDetalleVenta;
-        document.getElementById('cantidad').value                  = d.cantidad;
-        document.getElementById('precioUnitario').value            = d.precioUnitario;
-        document.getElementById('subtotal').value                  = parseFloat(d.subtotal).toFixed(2);
-        document.getElementById('productoCodigoProducto').value    = d.productoCodigoProducto;
-        document.getElementById('ventasCodigoVenta').value         = d.ventasCodigoVenta;
+    const resultados = _todosLosDetalles.filter(d =>
+        String(d.codigoDetalleVenta).includes(query)
+    );
 
-        // Bloquear PK y FKs en modo búsqueda
-        document.getElementById('codigoDetalleVenta').disabled      = true;
-        document.getElementById('productoCodigoProducto').disabled  = true;
-        document.getElementById('ventasCodigoVenta').disabled       = true;
+    renderizarTabla(resultados);
 
-        document.getElementById('codigoDetalleHint').textContent = '🔍 Modo búsqueda';
-        document.getElementById('productoHint').textContent      = '🔗 FK → Productos';
-        document.getElementById('ventaHint').textContent         = '🔗 FK → Ventas';
-
-        // No activar modo edición en búsqueda
-        codigoEnEdicion = null;
-
-        mostrarToast(`Detalle #${id} encontrado ✓`, 'success');
-        document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
-
-    } catch (error) {
-        console.error('Error al buscar detalle:', error);
-        mostrarToast(`No se encontró el detalle con código ${id}`, 'error');
+    if (resultados.length === 0) {
+        mostrarToast(`No se encontró detalle con código "${query}"`, 'error');
     }
 }
 
 /*
    CÁLCULO DE SUBTOTAL (automático)
- */
+*/
 function calcularSubtotal() {
     const cant   = parseFloat(document.getElementById('cantidad').value)       || 0;
     const precio = parseFloat(document.getElementById('precioUnitario').value) || 0;
     document.getElementById('subtotal').value = (cant * precio).toFixed(2);
 }
 
+/*
+   2. GUARDAR — POST (crear) o PUT (actualizar)
+*/
 async function guardarDetalleVenta() {
-    // En edición la PK viene de la variable, no del input (está deshabilitado)
     const codigo     = codigoEnEdicion !== null
         ? codigoEnEdicion
         : parseInt(document.getElementById('codigoDetalleVenta').value);
@@ -125,7 +128,6 @@ async function guardarDetalleVenta() {
     const precioUnit = parseFloat(document.getElementById('precioUnitario').value);
     const subtotal   = parseFloat(document.getElementById('subtotal').value);
 
-    // Las FK vienen de variables en memoria en modo edición
     const codProd = codigoEnEdicion !== null
         ? _fkProductoGuardado
         : parseInt(document.getElementById('productoCodigoProducto').value);
@@ -139,12 +141,12 @@ async function guardarDetalleVenta() {
     }
 
     const data = {
-        codigoDetalleVenta:      codigo,
-        cantidad:                cantidad,
-        precioUnitario:          precioUnit,
-        subtotal:                subtotal,
-        productoCodigoProducto:  codProd,
-        ventasCodigoVenta:       codVen
+        codigoDetalleVenta:     codigo,
+        cantidad:               cantidad,
+        precioUnitario:         precioUnit,
+        subtotal:               subtotal,
+        productoCodigoProducto: codProd,
+        ventasCodigoVenta:      codVen
     };
 
     try {
@@ -169,6 +171,9 @@ async function guardarDetalleVenta() {
     }
 }
 
+/*
+   3. EDITAR — carga datos en el formulario y bloquea PK y FKs
+*/
 async function cargarEnFormulario(id) {
     try {
         const res = await fetch(`${API_URL}/${id}`);
@@ -176,29 +181,27 @@ async function cargarEnFormulario(id) {
 
         const d = await res.json();
 
-        document.getElementById('codigoDetalleVenta').value       = d.codigoDetalleVenta;
-        document.getElementById('cantidad').value                  = d.cantidad;
-        document.getElementById('precioUnitario').value            = d.precioUnitario;
-        document.getElementById('subtotal').value                  = parseFloat(d.subtotal).toFixed(2);
-        document.getElementById('productoCodigoProducto').value    = d.productoCodigoProducto;
-        document.getElementById('ventasCodigoVenta').value         = d.ventasCodigoVenta;
+        document.getElementById('codigoDetalleVenta').value      = d.codigoDetalleVenta;
+        document.getElementById('cantidad').value                 = d.cantidad;
+        document.getElementById('precioUnitario').value           = d.precioUnitario;
+        document.getElementById('subtotal').value                 = parseFloat(d.subtotal).toFixed(2);
+        document.getElementById('productoCodigoProducto').value   = d.productoCodigoProducto;
+        document.getElementById('ventasCodigoVenta').value        = d.ventasCodigoVenta;
 
-        // Guardar FKs antes de bloquear los inputs
+        // Guardar FKs en memoria antes de bloquear los inputs
         _fkProductoGuardado = d.productoCodigoProducto;
         _fkVentaGuardada    = d.ventasCodigoVenta;
         codigoEnEdicion     = id;
 
         // Bloquear PK
-        document.getElementById('codigoDetalleVenta').disabled     = true;
-        document.getElementById('codigoDetalleHint').textContent   = '🔒 PK — no editable';
+        document.getElementById('codigoDetalleVenta').disabled    = true;
+        document.getElementById('codigoDetalleHint').textContent  = 'PK — no editable';
 
-        // Bloquear FKs — modificarlas cambiaría el producto o la venta a la que
-        // pertenece este detalle, alterando datos históricos de la transacción.
+        // Bloquear FKs — modificarlas cambiaría el producto o venta asociada
         document.getElementById('productoCodigoProducto').disabled = true;
-        document.getElementById('productoHint').textContent        = '🔗 FK → Productos — no editable';
-
+        document.getElementById('productoHint').textContent        = 'FK Productos — no editable';
         document.getElementById('ventasCodigoVenta').disabled      = true;
-        document.getElementById('ventaHint').textContent           = '🔗 FK → Ventas — no editable';
+        document.getElementById('ventaHint').textContent           = 'FK Ventas — no editable';
 
         document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
 
@@ -208,7 +211,9 @@ async function cargarEnFormulario(id) {
     }
 }
 
-
+/*
+   4. ELIMINAR
+*/
 function confirmarEliminar(id) {
     codigoParaEliminar = id;
     document.getElementById('btnConfirmarEliminar').onclick = eliminarDetalle;
@@ -222,10 +227,8 @@ async function eliminarDetalle() {
     try {
         const res = await fetch(`${API_URL}/${codigoParaEliminar}`, { method: 'DELETE' });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
         mostrarToast('Detalle eliminado ✓', 'success');
         cargarDetalles();
-
     } catch (error) {
         console.error('Error al eliminar:', error);
         mostrarToast('Error al eliminar el detalle', 'error');
@@ -234,6 +237,9 @@ async function eliminarDetalle() {
     }
 }
 
+/*
+   LIMPIAR FORMULARIO
+*/
 function limpiarFormulario() {
     codigoEnEdicion     = null;
     _fkProductoGuardado = null;
