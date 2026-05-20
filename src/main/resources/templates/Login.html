@@ -54,24 +54,23 @@
             <div class="tab-indicator" id="tabIndicator"></div>
         </div>
 
-
+        <!-- ── PANEL LOGIN ── -->
         <div class="panel" id="panelLogin">
 
-            <!-- Alerta error de credenciales -->
+            <!-- Spring Security pone ?error en la URL cuando falla el login -->
             <div th:if="${param.error}" class="alert alert--error">
-                ❌ Usuario o contraseña incorrectos.
+                Usuario o contraseña incorrectos.
             </div>
-            <!-- Alerta sesión cerrada -->
+            <!-- Spring Security pone ?logout tras cerrar sesión -->
             <div th:if="${param.logout}" class="alert alert--success">
-                ✅ Sesión cerrada correctamente.
+                Sesión cerrada correctamente.
             </div>
 
             <!--
-
                 action="/login"  → Spring Security procesa este POST
                 name="username"  → debe ser exactamente "username"
                 name="password"  → debe ser exactamente "password"
-                El token CSRF lo inyecta Thymeleaf automáticamente
+                Thymeleaf inyecta el token CSRF automáticamente
             -->
             <form action="/login" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
@@ -115,7 +114,8 @@
                     </div>
                 </div>
 
-                <button class="btn-main" type="submit" id="btnLogin">
+                <!-- type="submit" dentro del form → Spring Security hace todo el trabajo -->
+                <button class="btn-main" type="submit">
                     <span class="btn-text">Entrar</span>
                 </button>
 
@@ -127,16 +127,11 @@
             </p>
         </div>
 
-
+        <!-- ── PANEL REGISTRO ── -->
         <div class="panel" id="panelRegistro" hidden>
             <p class="panel-subtitle">Crea tu cuenta en el sistema</p>
 
             <div class="form-grid-2">
-
-                <div class="field-group">
-                    <label class="field-label" for="regCodigo">Código Usuario <span class="req">*</span></label>
-                    <input class="field-input" type="number" id="regCodigo" placeholder="Ej. 101"/>
-                </div>
 
                 <div class="field-group">
                     <label class="field-label" for="regUsuario">Username <span class="req">*</span></label>
@@ -146,15 +141,6 @@
                 <div class="field-group">
                     <label class="field-label" for="regCorreo">Email <span class="req">*</span></label>
                     <input class="field-input" type="email" id="regCorreo" placeholder="correo@ejemplo.com"/>
-                </div>
-
-                <div class="field-group">
-                    <label class="field-label" for="regRol">Rol <span class="req">*</span></label>
-                    <select class="field-input field-select" id="regRol">
-                        <option value="ADMIN">Administrador</option>
-                        <option value="VENDEDOR" selected>Vendedor</option>
-                        <option value="BODEGUERO">Bodeguero</option>
-                    </select>
                 </div>
 
                 <div class="field-group field-full">
