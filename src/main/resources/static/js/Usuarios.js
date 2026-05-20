@@ -172,7 +172,7 @@ async function cargarEnFormulario(codigo) {
         document.getElementById('estado').value        = u.estado;
 
         document.getElementById('codigoUsuario').disabled = true;
-        document.getElementById('codigoHint').textContent = '🔒 Llave primaria — no editable (FK en Ventas)';
+        document.getElementById('codigoHint').textContent = 'Llave primaria — no editable (FK en Ventas)';
 
         codigoEnEdicion = codigo;
 
