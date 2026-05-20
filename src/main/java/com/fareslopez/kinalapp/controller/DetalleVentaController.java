@@ -5,11 +5,15 @@ import com.fareslopez.kinalapp.service.IDetalleVentaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
 @RequestMapping("/detalleventas")
 public class DetalleVentaController {
+
+    private static final Logger logger = LoggerFactory.getLogger(DetalleVentaController.class);
 
     @Autowired
     private IDetalleVentaService detalleVentaService;
@@ -17,7 +21,15 @@ public class DetalleVentaController {
     /* ── GET /detalleventas ── listar todos ── */
     @GetMapping
     public List<DetalleVenta> listar() {
-        return detalleVentaService.listarTodos();
+        List<DetalleVenta> lista = detalleVentaService.listarTodos();
+        logger.info("GET /detalleventas -> cantidad devuelta: {}", lista.size());
+        return lista;
+    }
+
+    /* Endpoint de diagnóstico: devuelve el conteo de detalles vistos por el backend */
+    @GetMapping("/count")
+    public long contar() {
+        return detalleVentaService.listarTodos().size();
     }
 
     /* ── GET /detalleventas/{id} ── buscar por ID (llave primaria) ── */
