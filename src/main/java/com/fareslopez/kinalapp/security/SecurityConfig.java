@@ -8,7 +8,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -28,12 +27,13 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+                // Usar BCrypt en ambiente de pruebas/producción; las contraseñas en BD deben ser hashes BCrypt
+                return new BCryptPasswordEncoder();
     }
 
     @Bean
     public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider((UserDetailsService) userDetailsService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
         return provider;
     }
@@ -50,16 +50,54 @@ public class SecurityConfig {
         http
                 .authenticationProvider(authProvider())
                 .authorizeHttpRequests(auth -> auth
+
+                        // ── Rutas públicas (sin sesión) ──────────────────────────
                         .requestMatchers(
                                 "/login-view", "/login", "/acceso-denegado",
                                 "/css/**", "/js/**", "/images/**", "/fonts/**", "/webjars/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/usuarios").hasRole("ADMIN")
-                        .requestMatchers("/usuarios-view", "/usuarios/**").hasRole("ADMIN")
-                        .requestMatchers("/productos-view", "/productos/**").hasAnyRole("ADMIN", "BODEGUERO")
-                        .requestMatchers("/clientes-view", "/clientes/**").hasAnyRole("ADMIN", "VENDEDOR")
-                        .requestMatchers("/ventas-view", "/ventas/**").hasAnyRole("ADMIN", "VENDEDOR")
-                        .requestMatchers("/detalleventa-view", "/detalleventas/**").hasAnyRole("ADMIN", "VENDEDOR")
+
+                        // ── Administración de usuarios ───────────────────────────
+                        .requestMatchers("/usuarios-view").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/usuarios", "/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,   "/usuarios").permitAll()
+                        .requestMatchers(HttpMethod.PUT,    "/usuarios/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/usuarios/**").hasRole("ADMIN")
+
+                        // ── Recursos generales: listar, buscar y agregar para USER/Admin ──
+                        .requestMatchers("/productos-view").hasAnyRole("ADMIN","VENDEDOR","CLIENTE")
+
+                        .requestMatchers("/clientes-view", "/ventas-view", "/detalleventa-view")
+                        .hasAnyRole("ADMIN", "VENDEDOR")
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/productos", "/productos/**"
+                        ).hasAnyRole("ADMIN", "VENDEDOR", "CLIENTE")
+
+                        .requestMatchers(HttpMethod.GET,
+                                "/clientes", "/clientes/**",
+                                "/ventas", "/ventas/**",
+                                "/detalleventas", "/detalleventas/**"
+                        ).hasAnyRole("ADMIN", "VENDEDOR")
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/productos"
+                        ).hasAnyRole("ADMIN", "VENDEDOR")
+
+                        .requestMatchers(HttpMethod.POST,
+                                "/clientes", "/ventas", "/detalleventas"
+                        ).hasAnyRole("ADMIN", "VENDEDOR")
+
+                        .requestMatchers(HttpMethod.PUT,
+                                "/clientes/**", "/productos/**",
+                                "/ventas/**", "/detalleventas/**"
+                        ).hasAnyRole("ADMIN", "VENDEDOR")
+
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/clientes/**", "/productos/**",
+                                "/ventas/**", "/detalleventas/**"
+                        ).hasAnyRole("ADMIN", "VENDEDOR")
+
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
