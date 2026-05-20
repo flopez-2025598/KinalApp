@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Cargar el panel login por defecto
     mostrarPanel('login');
 });
 
@@ -81,80 +80,24 @@ function mostrarToast(msg, tipo = 'success') {
     setTimeout(() => toast.classList.remove('toast--visible'), 3500);
 }
 
-/* ══════════════════════════════════════════════
-   INICIAR SESIÓN
-   Busca el usuario en /usuarios y valida credenciales
-   ══════════════════════════════════════════════ */
-async function iniciarSesion() {
-    const usernameInput = document.getElementById('loginUsuario');
-    const passInput     = document.getElementById('loginContrasena');
-    const btnLogin      = document.getElementById('btnLogin');
-
-    const username = usernameInput?.value.trim();
-    const password = passInput?.value;
-
-    if (!username || !password) {
-        mostrarToast('Por favor ingresa usuario y contraseña.', 'error');
-        return;
-    }
-
-    // Mostrar loader
-    setLoading(btnLogin, true);
-
-    try {
-        const res = await fetch(API_USUARIOS);
-        if (!res.ok) throw new Error('Error al conectar con el servidor.');
-
-        const usuarios = await res.json();
-
-        // Buscar coincidencia por username y contraseña
-        const encontrado = usuarios.find(
-            u => u.usuario === username && u.contrasena === password
-        );
-
-        if (!encontrado) {
-            mostrarToast('Usuario o contraseña incorrectos.', 'error');
-            setLoading(btnLogin, false);
-            return;
-        }
-
-        if (encontrado.estado === 0) {
-            mostrarToast('Tu cuenta está inactiva. Contacta al administrador.', 'error');
-            setLoading(btnLogin, false);
-            return;
-        }
-
-        // Guardar sesión en sessionStorage
-        sessionStorage.setItem('usuarioLogueado', JSON.stringify({
-            codigo:   encontrado.codigoUsuario,
-            username: encontrado.usuario,
-            rol:      encontrado.rol
-        }));
-
-        mostrarToast(`¡Bienvenido, ${encontrado.usuario}!`, 'success');
-
-        // Redirigir al módulo principal
-        setTimeout(() => { window.location.href = '/clientes-view'; }, 1200);
-
-    } catch (err) {
-        mostrarToast(err.message || 'Error inesperado.', 'error');
-        setLoading(btnLogin, false);
-    }
-}
-
+/*
+ * ══════════════════════════════════════════════
+ *  REGISTRO DE USUARIO
+ *  Llama a POST /usuarios con los datos del form.
+ *  La contraseña llega en texto plano al backend;
+ *  UsuarioService.guardar() la encripta con BCrypt
+ *  antes de persistirla. Así Spring Security puede
+ *  autenticar correctamente después.
+ * ══════════════════════════════════════════════
+ */
 async function registrarUsuario() {
     const btnReg = document.getElementById('btnRegistro');
 
-    const codigo    = parseInt(document.getElementById('regCodigo')?.value);
-    const usuario   = document.getElementById('regUsuario')?.value.trim();
-    const correo    = document.getElementById('regCorreo')?.value.trim();
-    const rol       = document.getElementById('regRol')?.value;
+    const usuario    = document.getElementById('regUsuario')?.value.trim();
+    const correo     = document.getElementById('regCorreo')?.value.trim();
     const contrasena = document.getElementById('regContrasena')?.value;
 
     // Validaciones básicas
-    if (!codigo || isNaN(codigo)) {
-        mostrarToast('El código de usuario es requerido.', 'error'); return;
-    }
     if (!usuario) {
         mostrarToast('El nombre de usuario es requerido.', 'error'); return;
     }
@@ -165,13 +108,12 @@ async function registrarUsuario() {
         mostrarToast('La contraseña debe tener al menos 6 caracteres.', 'error'); return;
     }
 
+    // Enviamos contraseña en texto plano → UsuarioService la encripta con BCrypt
     const nuevoUsuario = {
-        codigoUsuario: codigo,
-        usuario:       usuario,
-        contrasena:    contrasena,
-        correo:        correo,
-        rol:           rol,
-        estado:        1
+        usuario:    usuario,
+        contrasena: contrasena,
+        correo:     correo,
+        estado:     1
     };
 
     setLoading(btnReg, true);
@@ -188,7 +130,7 @@ async function registrarUsuario() {
             throw new Error(texto || `Error ${res.status}`);
         }
 
-        mostrarToast('¡Cuenta creada exitosamente! Ahora inicia sesión.', 'success');
+        mostrarToast('¡Cuenta creada! Ahora inicia sesión.', 'success');
         limpiarRegistro();
         setTimeout(() => mostrarPanel('login'), 1500);
 
@@ -216,6 +158,6 @@ function limpiarRegistro() {
     });
     const fill  = document.getElementById('strengthFill');
     const label = document.getElementById('strengthLabel');
-    if (fill)  fill.style.width = '0%';
+    if (fill)  { fill.style.width = '0%'; fill.style.backgroundColor = 'transparent'; }
     if (label) label.textContent = '';
 }
