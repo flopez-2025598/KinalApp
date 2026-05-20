@@ -2,7 +2,7 @@
    Ventas.js — KinalApp
    ========================================== */
 
-// ✅ Ruta relativa — antes era http://localhost:8080/ventas
+// Ruta relativa — antes era http://localhost:8080/ventas
 const API_URL = '/ventas';
 
 let codigoEnEdicion    = null;
@@ -58,8 +58,8 @@ function renderizarTabla(ventas) {
                         ${v.estado === 1 ? 'Activa' : 'Anulada'}
                     </span>
                 </td>
-                <td class="fk-cell">🔗 ${v.clientesDpiCliente}</td>
-                <td class="fk-cell">🔗 ${v.usuariosCodigoUsuario}</td>
+                <td class="fk-cell">${v.clientesDpiCliente}</td>
+                <td class="fk-cell">${v.usuariosCodigoUsuario}</td>
                 <td>
                     <div class="row-actions">
                         <button class="btn btn--secondary btn--sm"
@@ -188,12 +188,12 @@ async function cargarEnFormulario(codigo) {
         _fkUsuarioGuardado = v.usuariosCodigoUsuario;
 
         document.getElementById('codigoVenta').disabled           = true;
-        document.getElementById('codigoVentaHint').textContent    = '🔒 PK — no editable';
+        document.getElementById('codigoVentaHint').textContent    = 'PK — no editable';
         document.getElementById('clientesDpiCliente').disabled    = true;
-        document.getElementById('dpiClienteHint').textContent     = '🔗 FK → Clientes — no editable';
+        document.getElementById('dpiClienteHint').textContent     = 'FK Clientes — no editable';
         document.getElementById('clientesDpiCliente').classList.add('fk-locked');
         document.getElementById('usuariosCodigoUsuario').disabled = true;
-        document.getElementById('codigoUsuarioHint').textContent  = '🔗 FK → Usuarios — no editable';
+        document.getElementById('codigoUsuarioHint').textContent  = 'FK Usuarios — no editable';
         document.getElementById('usuariosCodigoUsuario').classList.add('fk-locked');
 
         codigoEnEdicion = codigo;
